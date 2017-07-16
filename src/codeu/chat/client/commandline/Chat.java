@@ -368,7 +368,7 @@ public final class Chat {
       }
     });
 
-    // C-JOIN (join conversation)
+    // (join conversation)
     //
     // Add a command that will join a conversation when the user enters
     // "c-join" while on the user panel.

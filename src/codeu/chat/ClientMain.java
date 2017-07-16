@@ -22,6 +22,8 @@ import codeu.chat.util.*;
 import codeu.chat.util.connections.ClientConnectionSource;
 import codeu.chat.util.connections.ConnectionSource;
 
+import javax.swing.*;
+
 final class ClientMain {
 
   private static final Logger.Log LOG = Logger.newLog(ClientMain.class);
@@ -39,6 +41,12 @@ final class ClientMain {
     String line;
 
     System.out.println("Loading interest system...");
+
+    JFrame window = new JFrame("CodeU Chat App");
+
+    window.pack();
+    window.setVisible(true);
+    window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
     while((line = bufferedReader.readLine()) != null) {
 
