@@ -14,6 +14,7 @@
 
 package codeu.chat;
 
+import java.awt.*;
 import java.io.*;
 
 import codeu.chat.client.commandline.Chat;
@@ -43,6 +44,87 @@ final class ClientMain {
     System.out.println("Loading interest system...");
 
     JFrame window = new JFrame("CodeU Chat App");
+    window.setSize(700, 700);
+
+    //Overall panel that will hold all smaller panels
+    JPanel backingPanel = new JPanel();
+    backingPanel.setLayout(new GridBagLayout());
+    GridBagConstraints backingConstraints = new GridBagConstraints();
+    backingConstraints.fill = GridBagConstraints.BOTH;
+    backingConstraints.gridx = 0;
+    backingConstraints.gridy = 0;
+    backingConstraints.gridwidth = 3;
+    backingConstraints.gridheight = 3;
+    backingPanel.setSize(700, 700);
+    window.add(backingPanel);
+    window.setContentPane(backingPanel);
+
+    //Panel to hold top/main panels containing chat text and user buttons
+    // panels will be switched based on where the user is in the chat app
+    JPanel switchPanel = new JPanel(new CardLayout());
+    switchPanel.setSize(700, 700);
+    CardLayout panelSwitcher = new CardLayout();
+    switchPanel.setLayout(panelSwitcher);
+    backingPanel.add(switchPanel, backingConstraints);
+
+    //Conversation panel holding buttons for chat panel's commands and chat's messages
+    JPanel rootPanel = new JPanel();
+    rootPanel.setLayout(new GridBagLayout());
+    GridBagConstraints conversationConstraints = new GridBagConstraints();
+    conversationConstraints.fill = GridBagConstraints.BOTH;
+    switchPanel.add(rootPanel, "rootPanel");
+    panelSwitcher.show(switchPanel, "rootPanel");
+
+    JPanel userList = new JPanel();
+    userList.setLayout(new BoxLayout(userList, BoxLayout.Y_AXIS));
+    JButton dummy = new JButton("user 1");
+    userList.add(dummy);
+    //TODO (optional?) add a display of users in the current conversation to userList panel
+    //would be displayed to the left of the panel of messages in the chat
+    conversationConstraints.gridx = 0;
+    conversationConstraints.gridy = 0;
+    conversationConstraints.gridwidth = 1;
+    conversationConstraints.gridheight = 3;
+    rootPanel.add(userList, conversationConstraints);
+
+    JTextArea messages = new JTextArea("Chat messages:");
+    messages.setLayout(new FlowLayout());
+    //TODO display the messages users are sending onto this messages JTextArea (I'm not sure if
+    //a JTextArea is ideal for this, but this is just a placeholder for now
+    conversationConstraints.gridx = 1;
+    conversationConstraints.gridy = 0;
+    conversationConstraints.gridwidth = 2;
+    conversationConstraints.gridheight = 2;
+    rootPanel.add(messages, conversationConstraints);
+
+    //Panel with command buttons and text input
+    JPanel inputPanel = new JPanel();
+    inputPanel.setLayout(new GridLayout(2, 1));
+    conversationConstraints.gridx = 1;
+    conversationConstraints.gridy = 2;
+    conversationConstraints.gridwidth = 2;
+    conversationConstraints.gridheight = 1;
+    rootPanel.add(inputPanel, conversationConstraints);
+
+    //Text input to send messages
+    JTextField messageInput = new JTextField(1);
+    inputPanel.add(messageInput);
+    //TODO action listening to read user's input text
+
+    //Command buttons
+    JPanel buttonPanel = new JPanel();
+    buttonPanel.setLayout(new GridLayout(1, 5));
+    inputPanel.add(buttonPanel);
+    JButton listUsers = new JButton("List Users");
+    buttonPanel.add(listUsers);
+    JButton addUser = new JButton("Add User");
+    buttonPanel.add(addUser);
+    JButton signIn = new JButton("Sign In");
+    buttonPanel.add(signIn);
+    JButton info = new JButton("Info");
+    buttonPanel.add(info);
+    JButton exit = new JButton("Exit");
+    buttonPanel.add(exit);
 
     window.pack();
     window.setVisible(true);
