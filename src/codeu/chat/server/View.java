@@ -46,10 +46,6 @@ public final class View implements BasicView, SinglesView {
     return all(model.conversationById());
   }
 
-  public Collection<ConversationHeader> getConversationAccessControls() {
-    return all(model.conversationByAccessControl());
-  }
-
   @Override
   public Collection<ConversationPayload> getConversationPayloads(Collection<Uuid> ids) {
     return intersect(model.conversationPayloadById(), ids);
