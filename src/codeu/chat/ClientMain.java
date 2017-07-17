@@ -67,11 +67,11 @@ final class ClientMain {
     switchPanel.setLayout(panelSwitcher);
     backingPanel.add(switchPanel, backingConstraints);
 
-    //Conversation panel holding buttons for chat panel's commands and chat's messages
+    //Root panel holding root panel's GUI
     JPanel rootPanel = new JPanel();
     rootPanel.setLayout(new GridBagLayout());
-    GridBagConstraints conversationConstraints = new GridBagConstraints();
-    conversationConstraints.fill = GridBagConstraints.BOTH;
+    GridBagConstraints rootConstraints = new GridBagConstraints();
+    rootConstraints.fill = GridBagConstraints.BOTH;
     switchPanel.add(rootPanel, "rootPanel");
     panelSwitcher.show(switchPanel, "rootPanel");
 
@@ -79,37 +79,38 @@ final class ClientMain {
     userList.setLayout(new BoxLayout(userList, BoxLayout.Y_AXIS));
     JButton dummy = new JButton("user 1");
     userList.add(dummy);
-    //TODO (optional?) add a display of users in the current conversation to userList panel
+    //TODO (optional?) add a display of users currently registered to Server to userList panel
     //would be displayed to the left of the panel of messages in the chat
-    conversationConstraints.gridx = 0;
-    conversationConstraints.gridy = 0;
-    conversationConstraints.gridwidth = 1;
-    conversationConstraints.gridheight = 3;
-    rootPanel.add(userList, conversationConstraints);
+    rootConstraints.gridx = 0;
+    rootConstraints.gridy = 0;
+    rootConstraints.gridwidth = 1;
+    rootConstraints.gridheight = 3;
+    rootPanel.add(userList, rootConstraints);
 
-    JTextArea messages = new JTextArea("Chat messages:");
+    JTextArea messages = new JTextArea("Chat messages");
     messages.setLayout(new FlowLayout());
     //TODO display the messages users are sending onto this messages JTextArea (I'm not sure if
     //a JTextArea is ideal for this, but this is just a placeholder for now
-    conversationConstraints.gridx = 1;
-    conversationConstraints.gridy = 0;
-    conversationConstraints.gridwidth = 2;
-    conversationConstraints.gridheight = 2;
-    rootPanel.add(messages, conversationConstraints);
+    //In root panel there are no messages being sent so this will remain blank
+    rootConstraints.gridx = 1;
+    rootConstraints.gridy = 0;
+    rootConstraints.gridwidth = 2;
+    rootConstraints.gridheight = 2;
+    rootPanel.add(messages, rootConstraints);
 
     //Panel with command buttons and text input
     JPanel inputPanel = new JPanel();
     inputPanel.setLayout(new GridLayout(2, 1));
-    conversationConstraints.gridx = 1;
-    conversationConstraints.gridy = 2;
-    conversationConstraints.gridwidth = 2;
-    conversationConstraints.gridheight = 1;
-    rootPanel.add(inputPanel, conversationConstraints);
+    rootConstraints.gridx = 1;
+    rootConstraints.gridy = 2;
+    rootConstraints.gridwidth = 2;
+    rootConstraints.gridheight = 1;
+    rootPanel.add(inputPanel, rootConstraints);
 
-    //Text input to send messages
+    //Text input to sign in/add user
     JTextField messageInput = new JTextField(1);
     inputPanel.add(messageInput);
-    //TODO action listening to read user's input text
+    //TODO parse input and link it to the u-sign-in and u-add commands
 
     //Command buttons
     JPanel buttonPanel = new JPanel();
