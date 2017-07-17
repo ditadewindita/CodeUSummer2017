@@ -696,14 +696,18 @@ public final class Chat {
         System.out.println("    List all messages in the current conversation.");
         System.out.println("  m-add <message>");
         System.out.println("    Add a new message to the current conversation as the current user.");
+        System.out.println("  u-member-list");
+        System.out.println("    List all members in the current conversation.");
         System.out.println("  u-add-member <username>");
         System.out.println("    Add a member of the current conversation, can only be done by conversation owners or creator.");
         System.out.println("  u-remove-member <username>");
         System.out.println("    Remove a member of the current conversation, can only be done by conversation owners or creator.");
-        System.out.println("  u-remove-owner <username>");
-        System.out.println("    Remove an owner of the current conversation, can only be done by conversation's creator.");
+        System.out.println("  u-owner-list");
+        System.out.println("    List all members in the current conversation.");
         System.out.println("  u-add-owner <username>");
         System.out.println("    Add an owner of the current conversation, can only be done by conversation's creator.");
+        System.out.println("  u-remove-owner <username>");
+        System.out.println("    Remove an owner of the current conversation, can only be done by conversation's creator.");
         System.out.println("  my-access-status");
         System.out.println("    Display info about the current user's access control in the conversation.");
         System.out.println("  info");
@@ -774,6 +778,22 @@ public final class Chat {
       }
     });
 
+      // U-MEMBER-LIST
+      //
+      // List all members of the current conversation
+      //
+      panel.register("u-member-list", new Panel.Command() {
+        @Override
+        public void invoke(List<String> args) {
+          HashMap<Uuid, Integer> controls = getConversationAccessControl(conversation.conversation.id);
+          for(Uuid u : controls.keySet()){
+            UserContext user = findUser(u);
+            if(isMember(conversation, user.user))
+              System.out.format("Name: %s  (UUID: %s)\n", user.user.name, user.user.id);
+          }
+        }
+      });
+
       // U-ADD-MEMBER (adds member from conversation)
       //
       // A user who's the conversation's owner or creator may use this command
@@ -840,6 +860,22 @@ public final class Chat {
         }
         else {
           System.out.println("ERROR: Only users with owner or creator status\n can remove members from a conversation.");
+        }
+      }
+    });
+
+    // U-OWNER-LIST
+    //
+    // List all members of the current conversation
+    //
+    panel.register("u-owner-list", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        HashMap<Uuid, Integer> controls = getConversationAccessControl(conversation.conversation.id);
+        for(Uuid u : controls.keySet()){
+          UserContext user = findUser(u);
+          if(isOwner(conversation, user.user))
+            System.out.format("Name: %s  (UUID: %s)\n", user.user.name, user.user.id);
         }
       }
     });
