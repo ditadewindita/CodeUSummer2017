@@ -357,7 +357,6 @@ public final class Chat {
             Set<Uuid> newConversations = newConversationsMap.computeIfAbsent(user.user.id, id -> new HashSet<>());
             newConversations.add(conversation.conversation.id);
             newConversationsMap.put(user.user.id, newConversations);
-
             transactionLog.add(String.format("ADD-CONVERSATION %s %s \"%s\" %s",
                     conversation.conversation.id,
                     conversation.conversation.owner,
@@ -365,9 +364,12 @@ public final class Chat {
                     conversation.conversation.creation.inMs()
             ));
 
-            toggleUserToCreator(conversation, user.user, true);
-            toggleUserToOwner(conversation, user.user, true);
-            toggleUserToMember(conversation, user.user, true);
+            toggleUserToCreator(conversation.conversation.id, user.user.id, true);
+            transactionLog.add(String.format("ADD-CONVO-CREATOR %s %s",
+                    conversation.conversation.id,
+                    user.user.id
+            ));
+
           }
         } else {
           System.out.println("ERROR: Missing <title>");
@@ -386,14 +388,13 @@ public final class Chat {
         final String name = args.size() > 0 ? String.join(" ", args) : "";
         if (name.length() > 0) {
             final ConversationContext conversation = find(name);
+            if (conversation == null) {
+              System.out.format("ERROR: No conversation with name '%s'\n", name);
+            }
             //if the user has been removed from the conversation before they can't join on their own
-            if (!hasBeenRemoved(conversation, user.user)) {
-                if (conversation == null) {
-                    System.out.format("ERROR: No conversation with name '%s'\n", name);
-                } else {
-                    panels.push(createConversationPanel(conversation));
-                    toggleUserToMember(conversation, user.user, true);
-                }
+            else if (!hasBeenRemoved(conversation.conversation.id, user.user.id)) {
+              panels.push(createConversationPanel(conversation));
+              toggleUserToMember(conversation.conversation.id, user.user.id, true);
             } else {
                 System.out.println("ERROR: Missing <title>");
             }
@@ -453,7 +454,7 @@ public final class Chat {
           if (conversation == null) {
             System.out.format("ERROR: No conversation with name '%s'\n", name);
           } else {
-              addConvoInterest(user.user.id, conversation.conversation.id);
+              addConvoInterest(user.user.id, conversation.conversation.id, true);
 
               transactionLog.add(String.format("ADD-INTEREST-CONVERSATION %s %s",
                       user.user.id,
@@ -540,7 +541,7 @@ public final class Chat {
           if (interestUser == null) {
             System.out.format("ERROR: User '%s' does not exist.\n", name);
           } else {
-              addUserInterest(user.user.id, interestUser.user.id);
+              addUserInterest(user.user.id, interestUser.user.id, true);
 
               transactionLog.add(String.format("ADD-INTEREST-USER %s %s",
                       user.user.id,
@@ -750,7 +751,7 @@ public final class Chat {
     panel.register("m-add", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
-        if (isMember(conversation, userPanelContext.user)){
+        if (isMember(conversation.conversation.id, userPanelContext.user.id)){
           final String message = args.size() > 0 ? String.join(" ", args) : "";
           if (message.length() > 0) {
             MessageContext messageContext = conversation.add(message);
@@ -788,7 +789,7 @@ public final class Chat {
           HashMap<Uuid, Integer> controls = getConversationAccessControl(conversation.conversation.id);
           for(Uuid u : controls.keySet()){
             UserContext user = findUser(u);
-            if(isMember(conversation, user.user))
+            if(isMember(conversation.conversation.id, user.user.id))
               System.out.format("Name: %s  (UUID: %s)\n", user.user.name, user.user.id);
           }
         }
@@ -805,19 +806,22 @@ public final class Chat {
           @Override
           public void invoke(List<String> args) {
               final String name = args.size() > 0 ? String.join(" ", args) : "";
-              ConversationHeader currentConvo = conversation.conversation;
-
-              if (isOwner(conversation, userPanelContext.user) || isCreator(conversation, userPanelContext.user)){
+              if (isOwner(conversation.conversation.id, userPanelContext.user.id) || isCreator(conversation.conversation.id, userPanelContext.user.id)){
                   if (name.length() > 0) {
                       final UserContext removeUser = findUser(name);
                       if (removeUser == null) {
                           System.out.format("ERROR: User '%s' does not exist.\n", name);
                       }
-                      else if (isCreator(conversation, removeUser.user) || isOwner(conversation, removeUser.user)){
+                      else if (isCreator(conversation.conversation.id, removeUser.user.id) || isOwner(conversation.conversation.id, removeUser.user.id)){
                           System.out.format("ERROR: User '%s' is an owner or creator.\n", name);
                       }
                       else {
-                          toggleUserToMember(conversation, removeUser.user, true);
+                          toggleUserToMember(conversation.conversation.id, removeUser.user.id, true);
+
+                          transactionLog.add(String.format("ADD-CONVO-MEMBER %s %s",
+                                  conversation.conversation.id,
+                                  removeUser.user.id
+                          ));
                       }
                   } else {
                       System.out.println("ERROR: Missing <username>");
@@ -838,21 +842,32 @@ public final class Chat {
       @Override
       public void invoke(List<String> args) {
         final String name = args.size() > 0 ? String.join(" ", args) : "";
-        if (isOwner(conversation, userPanelContext.user) || isCreator(conversation, userPanelContext.user)){
+        if (isOwner(conversation.conversation.id, userPanelContext.user.id) || isCreator(conversation.conversation.id, userPanelContext.user.id)){
           if (name.length() > 0) {
             final UserContext removeUser = findUser(name);
             if (removeUser == null) {
               System.out.format("ERROR: User '%s' does not exist.\n", name);
             }
-            else if (isCreator(conversation, removeUser.user) || isOwner(conversation, removeUser.user)){
+            else if (isCreator(conversation.conversation.id, removeUser.user.id) || isOwner(conversation.conversation.id, removeUser.user.id)){
               System.out.format("ERROR: User '%s' is an owner or creator.\n", name);
             }
             else {
-              toggleUserToMember(conversation, removeUser.user, false);
+              toggleUserToMember(conversation.conversation.id, removeUser.user.id, false);
+
+              transactionLog.add(String.format("REMOVE-CONVO-MEMBER %s %s",
+                      conversation.conversation.id,
+                      removeUser.user.id
+              ));
 
               //the removed flag should only be toggled once, when the user is first removed
-              if (!hasBeenRemoved(conversation, removeUser.user))
-                toggleRemoved(conversation, removeUser.user);
+              if (!hasBeenRemoved(conversation.conversation.id, removeUser.user.id)) {
+                toggleRemoved(conversation.conversation.id, removeUser.user.id);
+
+                transactionLog.add(String.format("REMOVE-CONVO-MEMBER-TOGGLE %s %s",
+                        conversation.conversation.id,
+                        removeUser.user.id
+                ));
+              }
             }
           } else {
             System.out.println("ERROR: Missing <username>");
@@ -874,7 +889,7 @@ public final class Chat {
         HashMap<Uuid, Integer> controls = getConversationAccessControl(conversation.conversation.id);
         for(Uuid u : controls.keySet()){
           UserContext user = findUser(u);
-          if(isOwner(conversation, user.user))
+          if(isOwner(conversation.conversation.id, user.user.id))
             System.out.format("Name: %s  (UUID: %s)\n", user.user.name, user.user.id);
         }
       }
@@ -890,13 +905,18 @@ public final class Chat {
       public void invoke(List<String> args) {
         final String name = args.size() > 0 ? String.join(" ", args) : "";
 
-        if (isCreator(conversation, userPanelContext.user)){
+        if (isCreator(conversation.conversation.id, userPanelContext.user.id)){
           if (name.length() > 0) {
             final UserContext removedOwner = findUser(name);
             if (removedOwner == null) {
               System.out.format("ERROR: User '%s' does not exist.\n", name);
             } else {
-              toggleUserToOwner(conversation, removedOwner.user, false);
+              toggleUserToOwner(conversation.conversation.id, removedOwner.user.id, false);
+
+              transactionLog.add(String.format("REMOVE-CONVO-OWNER %s %s",
+                      conversation.conversation.id,
+                      removedOwner.user.id
+              ));
             }
           } else {
             System.out.println("ERROR: Missing <username>");
@@ -918,13 +938,18 @@ public final class Chat {
       public void invoke(List<String> args) {
         final String name = args.size() > 0 ? String.join(" ", args) : "";
 
-        if (isCreator(conversation, userPanelContext.user)) {
+        if (isCreator(conversation.conversation.id, userPanelContext.user.id)) {
           if (name.length() > 0) {
             final UserContext addedOwner = findUser(name);
             if (addedOwner == null) {
               System.out.format("ERROR: User '%s' does not exist.\n", name);
             } else {
-              toggleUserToOwner(conversation, addedOwner.user, true);
+              toggleUserToOwner(conversation.conversation.id, addedOwner.user.id, true);
+
+              transactionLog.add(String.format("ADD-CONVO-OWNER %s %s",
+                      conversation.conversation.id,
+                      addedOwner.user.id
+              ));
             }
           } else {
             System.out.println("ERROR: Missing <username>");
@@ -944,9 +969,9 @@ public final class Chat {
       @Override
       public void invoke(List<String> args) {
         System.out.println("Access Control:");
-        System.out.format("  Member : %s\n", isMember(conversation, userPanelContext.user));
-        System.out.format("  Owner  : %s\n", isOwner(conversation, userPanelContext.user));
-        System.out.format("  Creator : %s\n", isCreator(conversation, userPanelContext.user));
+        System.out.format("  Member : %s\n", isMember(conversation.conversation.id, userPanelContext.user.id));
+        System.out.format("  Owner  : %s\n", isOwner(conversation.conversation.id, userPanelContext.user.id));
+        System.out.format("  Creator : %s\n", isCreator(conversation.conversation.id, userPanelContext.user.id));
       }
     });
 
@@ -1040,17 +1065,20 @@ public final class Chat {
     return userPanelContext.conversations().get(id);
    }
 
-  public void addUserInterest(Uuid userID, Uuid followedUserID){
+  public void addUserInterest(Uuid userID, Uuid followedUserID, boolean print){
     Set<Uuid> userInterest = userInterestMap.computeIfAbsent(userID, followedUser -> new HashSet<>());
 
     // Check if the user is trying to follow themselves
     if(userID.id() == followedUserID.id()) {
-      System.out.println("ERROR: Cannot add yourself to followed users list!");
+      if(print)
+        System.out.println("ERROR: Cannot add yourself to followed users list!");
       return;
     }
 
-    if(userInterest.contains(followedUserID))
-      System.out.println("ERROR: User is already followed!");
+    if(userInterest.contains(followedUserID)) {
+      if(print)
+        System.out.println("ERROR: User is already followed!");
+    }
     else {
       HashMap<Uuid, Integer> followedUserConversations = convoMessageCountsMap.computeIfAbsent(followedUserID, messageCount -> new HashMap<>());
 
@@ -1066,11 +1094,13 @@ public final class Chat {
     }
   }
 
-  public void addConvoInterest(Uuid userID, Uuid followedConvoID){
+  public void addConvoInterest(Uuid userID, Uuid followedConvoID, boolean print){
     Set<Uuid> convoInterest = convoInterestMap.computeIfAbsent(userID, followedConvo -> new HashSet<>());
 
-    if(convoInterest.contains(followedConvoID))
+    if(convoInterest.contains(followedConvoID)) {
+      if(print)
         System.out.println("ERROR: Conversation is already in interest list!");
+    }
     else {
       convoInterest.add(followedConvoID);
       convoInterestMap.put(userID, convoInterest);
@@ -1104,9 +1134,9 @@ public final class Chat {
   }
 
   // Flag is set to true if user is to be set to new status, else it's bit is 'turned off'
-  public void toggleUserToMember(ConversationContext c, User u, boolean flag){
-    HashMap<Uuid, Integer> controls = getConversationAccessControl(c.conversation.id);
-    Integer access = controls.computeIfAbsent(u.id, newAccess -> 0);
+  public void toggleUserToMember(Uuid c, Uuid u, boolean flag){
+    HashMap<Uuid, Integer> controls = getConversationAccessControl(c);
+    Integer access = controls.computeIfAbsent(u, newAccess -> 0);
     Integer newAccess;
 
     if(flag)
@@ -1114,80 +1144,80 @@ public final class Chat {
       // If member bit is to be 'turned off', also turn off it's parent controls
     else {
       newAccess = access & ~MEMBER;
-      toggleUserToOwner(c, u, false);
-      toggleUserToCreator(c, u, false);
+      newAccess &= ~OWNER;
+      newAccess &= ~CREATOR;
     }
-    controls.put(u.id, newAccess);
-    convoAccessControls.put(c.conversation.id, controls);
+    controls.put(u, newAccess);
+    convoAccessControls.put(c, controls);
   }
 
-  public void toggleUserToOwner(ConversationContext c, User u, boolean flag){
-    HashMap<Uuid, Integer> controls = getConversationAccessControl(c.conversation.id);
-    Integer access = controls.computeIfAbsent(u.id, newAccess -> 0);
+  public void toggleUserToOwner(Uuid c, Uuid u, boolean flag){
+    HashMap<Uuid, Integer> controls = getConversationAccessControl(c);
+    Integer access = controls.computeIfAbsent(u, newAccess -> 0);
     Integer newAccess;
 
     // If user is to be set as an Owner, it will also be it's children controls
     if(flag){
       newAccess = access | OWNER;
-      toggleUserToMember(c, u, true);
+      newAccess |= MEMBER;
     }
     // If user is not an Owner anymore, it is also not it's parent controls anymore
     else {
       newAccess = access & ~OWNER;
-      toggleUserToCreator(c, u, false);
+      newAccess &= ~CREATOR;
     }
-    controls.put(u.id, newAccess);
-    convoAccessControls.put(c.conversation.id, controls);
+    controls.put(u, newAccess);
+    convoAccessControls.put(c, controls);
   }
 
-  public void toggleUserToCreator(ConversationContext c, User u, boolean flag){
-    HashMap<Uuid, Integer> controls = getConversationAccessControl(c.conversation.id);
-    Integer access = controls.computeIfAbsent(u.id, newAccess -> 0);
+  public void toggleUserToCreator(Uuid c, Uuid u, boolean flag){
+    HashMap<Uuid, Integer> controls = getConversationAccessControl(c);
+    Integer access = controls.computeIfAbsent(u, newAccess -> 0);
     Integer newAccess;
 
     // If user is to be set as a Creator, it will also be it's children controls
     if(flag) {
       newAccess = access | CREATOR;
-      toggleUserToOwner(c, u, true);
-      toggleUserToMember(c, u, true);
+      newAccess |= OWNER;
+      newAccess |= MEMBER;
     }
     else
       newAccess = access & ~CREATOR;
 
-    controls.put(u.id, newAccess);
-    convoAccessControls.put(c.conversation.id, controls);
+    controls.put(u, newAccess);
+    convoAccessControls.put(c, controls);
   }
 
   // Flag is set to true if the user is removed from a conversation.
   // Flag stays true once it's set.
-  public void toggleRemoved(ConversationContext c, User u){
-    HashMap<Uuid, Integer> controls = getConversationAccessControl(c.conversation.id);
-    Integer access = controls.computeIfAbsent(u.id, newAccess -> 0);
+  public void toggleRemoved(Uuid c, Uuid u){
+    HashMap<Uuid, Integer> controls = getConversationAccessControl(c);
+    Integer access = controls.computeIfAbsent(u, newAccess -> 0);
     Integer newAccess;
 
     newAccess = access | REMOVED;
 
-    controls.put(u.id, newAccess);
-    convoAccessControls.put(c.conversation.id, controls);
+    controls.put(u, newAccess);
+    convoAccessControls.put(c, controls);
   }
 
-  public boolean isMember(ConversationContext c, User u){
-    HashMap<Uuid, Integer> controls = getConversationAccessControl(c.conversation.id);
-    return controls.get(u.id) != null && (controls.get(u.id) & MEMBER) != 0;
+  public boolean isMember(Uuid c, Uuid u){
+    HashMap<Uuid, Integer> controls = getConversationAccessControl(c);
+    return controls.get(u) != null && (controls.get(u) & MEMBER) != 0;
   }
 
-  public boolean isOwner(ConversationContext c, User u){
-    HashMap<Uuid, Integer> controls = getConversationAccessControl(c.conversation.id);
-    return controls.get(u.id) != null && (controls.get(u.id) & OWNER) != 0;
+  public boolean isOwner(Uuid c, Uuid u){
+    HashMap<Uuid, Integer> controls = getConversationAccessControl(c);
+    return controls.get(u) != null && (controls.get(u) & OWNER) != 0;
   }
 
-  public boolean isCreator(ConversationContext c, User u){
-    HashMap<Uuid, Integer> controls = getConversationAccessControl(c.conversation.id);
-    return controls.get(u.id) != null && (controls.get(u.id) & CREATOR) != 0;
+  public boolean isCreator(Uuid c, Uuid u){
+    HashMap<Uuid, Integer> controls = getConversationAccessControl(c);
+    return controls.get(u) != null && (controls.get(u) & CREATOR) != 0;
   }
 
-  public boolean hasBeenRemoved(ConversationContext c, User u){
-    HashMap<Uuid, Integer> controls = getConversationAccessControl(c.conversation.id);
-    return controls.get(u.id) != null && (controls.get(u.id) & REMOVED) != 0;
+  public boolean hasBeenRemoved(Uuid c, Uuid u){
+    HashMap<Uuid, Integer> controls = getConversationAccessControl(c);
+    return controls.get(u) != null && (controls.get(u) & REMOVED) != 0;
   }
 }

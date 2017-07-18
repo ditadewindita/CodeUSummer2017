@@ -47,11 +47,12 @@ final class ClientMain {
 
       String commandType = logInfo.next();
 
+      // INTEREST SYSTEM
       if(commandType.equals("ADD-INTEREST-USER")){
         Uuid owner = Uuid.parse(logInfo.next());
         Uuid follow = Uuid.parse(logInfo.next());
 
-        chat.addUserInterest(owner, follow);
+        chat.addUserInterest(owner, follow, false);
       }
       else if(commandType.equals("REMOVE-INTEREST-USER")){
         Uuid owner = Uuid.parse(logInfo.next());
@@ -63,13 +64,51 @@ final class ClientMain {
         Uuid owner = Uuid.parse(logInfo.next());
         Uuid follow = Uuid.parse(logInfo.next());
 
-        chat.addConvoInterest(owner, follow);
+        chat.addConvoInterest(owner, follow, false);
       }
       else if(commandType.equals("REMOVE-INTEREST-CONVERSATION")){
         Uuid owner = Uuid.parse(logInfo.next());
         Uuid follow = Uuid.parse(logInfo.next());
 
         chat.removeConvoInterest(owner, follow);
+      }
+
+      // ACCESS CONTROL
+      else if(commandType.equals("ADD-CONVO-CREATOR")){
+        Uuid convo = Uuid.parse(logInfo.next());
+        Uuid user = Uuid.parse(logInfo.next());
+
+        chat.toggleUserToCreator(convo, user, true);
+      }
+      else if(commandType.equals("ADD-CONVO-MEMBER")){
+        Uuid convo = Uuid.parse(logInfo.next());
+        Uuid user = Uuid.parse(logInfo.next());
+
+        chat.toggleUserToMember(convo, user, true);
+      }
+      else if(commandType.equals("REMOVE-CONVO-MEMBER")){
+        Uuid convo = Uuid.parse(logInfo.next());
+        Uuid user = Uuid.parse(logInfo.next());
+
+        chat.toggleUserToMember(convo, user, false);
+      }
+      else if(commandType.equals("REMOVE-CONVO-TOGGLE")){
+        Uuid convo = Uuid.parse(logInfo.next());
+        Uuid user = Uuid.parse(logInfo.next());
+
+        chat.toggleRemoved(convo, user);
+      }
+      else if(commandType.equals("ADD-CONVO-OWNER")){
+        Uuid convo = Uuid.parse(logInfo.next());
+        Uuid user = Uuid.parse(logInfo.next());
+
+        chat.toggleUserToOwner(convo, user, true);
+      }
+      else if(commandType.equals("REMOVE-CONVO-OWNER")){
+        Uuid convo = Uuid.parse(logInfo.next());
+        Uuid user = Uuid.parse(logInfo.next());
+
+        chat.toggleUserToOwner(convo, user, false);
       }
     }
 
