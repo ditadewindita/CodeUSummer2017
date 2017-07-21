@@ -14,6 +14,7 @@
 
 package codeu.chat.server;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 
@@ -53,9 +54,23 @@ public final class Model {
 
   private static final Comparator<String> STRING_COMPARE = String.CASE_INSENSITIVE_ORDER;
 
+  // ADDED
+  private static final Comparator<Collection<Uuid>> COLLECTION_COMPARATOR = new Comparator<Collection<Uuid>>() {
+    @Override
+    public int compare(Collection<Uuid> o1, Collection<Uuid> o2) {
+      if(o1.containsAll(o2))
+        return -1;
+      else if(o2.containsAll(o1))
+        return 1;
+      return 0;
+    }
+  };
+
   private final Store<Uuid, User> userById = new Store<>(UUID_COMPARE);
   private final Store<Time, User> userByTime = new Store<>(TIME_COMPARE);
   private final Store<String, User> userByText = new Store<>(STRING_COMPARE);
+  // ADDED
+  private final Store<Collection<Uuid>, User> userByInterest = new Store<>(COLLECTION_COMPARATOR);
 
   private final Store<Uuid, ConversationHeader> conversationById = new Store<>(UUID_COMPARE);
   private final Store<Time, ConversationHeader> conversationByTime = new Store<>(TIME_COMPARE);
@@ -71,6 +86,8 @@ public final class Model {
     userById.insert(user.id, user);
     userByTime.insert(user.creation, user);
     userByText.insert(user.name, user);
+    // ADDED
+    userByInterest.insert(user.interests, user);
   }
 
   public StoreAccessor<Uuid, User> userById() {
@@ -84,6 +101,9 @@ public final class Model {
   public StoreAccessor<String, User> userByText() {
     return userByText;
   }
+
+  // ADDED
+  public StoreAccessor<Collection<Uuid>, User> userByInterest() { return userByInterest; }
 
   public void add(ConversationHeader conversation) {
     conversationById.insert(conversation.id, conversation);

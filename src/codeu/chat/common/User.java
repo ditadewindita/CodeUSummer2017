@@ -53,10 +53,13 @@ public final class User {
   public final String name;
   public final Time creation;
 
+  public Set<Uuid> interests;
+
   public User(Uuid id, String name, Time creation) {
 
     this.id = id;
     this.name = name;
     this.creation = creation;
+    interests = new HashSet<>();
   }
 }

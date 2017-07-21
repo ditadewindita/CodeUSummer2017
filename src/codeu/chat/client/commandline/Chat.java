@@ -291,6 +291,10 @@ public final class Chat {
       @Override
       public void invoke(List<String> args) {
         System.out.println("USER MODE");
+        System.out.println("  LIST-INTERESTS");
+        System.out.println("    Print out 'interests' set in User object -- DEBUG FEATURE");
+        System.out.println("  ADD-INTERESTS");
+        System.out.println("    Add an 'interest' to set in User object -- DEBUG FEATURE");
         System.out.println("  c-list");
         System.out.println("    List all conversations that the current user can interact with.");
         System.out.println("  c-add <title>");
@@ -317,6 +321,28 @@ public final class Chat {
         System.out.println("    Go back to ROOT MODE.");
         System.out.println("  exit");
         System.out.println("    Exit the program.");
+      }
+    });
+
+    panel.register("LIST-INTERESTS", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        for(Uuid u : user.user.interests)
+          System.out.format("USER NAME: %s (UUID: %s)\n", findUser(u).user.name, u);
+      }
+    });
+
+    panel.register("ADD-INTERESTS", new Panel.Command() {
+      @Override
+      public void invoke(List<String> args) {
+        final String name = args.size() > 0 ? String.join(" ", args) : "";
+        if(name.length() > 0) {
+          final UserContext addUser = findUser(name);
+          if (addUser == null)
+            System.out.println("User not found!");
+          else
+            user.user.interests.add(addUser.user.id);
+        }
       }
     });
 
