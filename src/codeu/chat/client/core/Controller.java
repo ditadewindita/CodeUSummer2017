@@ -14,6 +14,7 @@
 
 package codeu.chat.client.core;
 
+import java.security.spec.ECField;
 import java.util.Collection;
 
 import codeu.chat.common.BasicController;
@@ -35,6 +36,28 @@ public class Controller implements BasicController {
 
   public Controller(ConnectionSource source) {
     this.source = source;
+  }
+
+  public Collection<Uuid> newConvoInterest(Uuid user, Uuid convo){
+    Collection<Uuid> response = null;
+
+    try(final Connection connection = source.connect()){
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.NEW_INTEREST_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), user);
+      Uuid.SERIALIZER.write(connection.out(), convo);
+
+      if(Serializers.INTEGER.read(connection.in()) == NetworkCode.NEW_INTEREST_RESPONSE){
+        response = Serializers.collection(Uuid.SERIALIZER).read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+    } catch (Exception ex){
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+
+    return response;
   }
 
   @Override

@@ -327,8 +327,8 @@ public final class Chat {
     panel.register("LIST-INTERESTS", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
-        for(Uuid u : user.user.interests)
-          System.out.format("USER NAME: %s (UUID: %s)\n", findUser(u).user.name, u);
+        for(Uuid u : user.getConvoInterests())
+          System.out.format("USER NAME: %s (UUID: %s)\n", findConversation(u).conversation.title, u);
       }
     });
 
@@ -337,11 +337,13 @@ public final class Chat {
       public void invoke(List<String> args) {
         final String name = args.size() > 0 ? String.join(" ", args) : "";
         if(name.length() > 0) {
-          final UserContext addUser = findUser(name);
-          if (addUser == null)
+          final ConversationContext addConvo = findConversation(name);
+          if (addConvo == null)
             System.out.println("User not found!");
           else
-            user.user.interests.add(addUser.user.id);
+            user.addConvoInterest(addConvo.conversation.id);
+        } else {
+          System.out.println("ERROR: Missing <title>");
         }
       }
     });

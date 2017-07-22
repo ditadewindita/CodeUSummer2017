@@ -52,4 +52,6 @@ public interface BasicController {
   //  representing the full state of the conversation on the server.
   //  Whether conversations can have the same title is undefined.
   ConversationHeader newConversation(String title, Uuid owner);
+
+  Collection<Uuid> newConvoInterest(Uuid user, Uuid convo);
 }

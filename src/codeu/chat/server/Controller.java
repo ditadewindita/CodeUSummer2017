@@ -17,6 +17,7 @@ package codeu.chat.server;
 import java.util.Collection;
 import java.util.HashSet;
 
+import codeu.chat.client.core.ConversationContext;
 import codeu.chat.common.BasicController;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
@@ -53,6 +54,17 @@ public final class Controller implements RawController, BasicController {
   @Override
   public ConversationHeader newConversation(String title, Uuid owner) {
     return newConversation(createId(), title, owner, Time.now());
+  }
+
+  public Collection<Uuid> newConvoInterest(Uuid user, Uuid interest){
+    final User foundUser = model.userById().first(user);
+    final ConversationHeader foundConvo = model.conversationById().first(interest);
+
+    if(foundUser != null && foundConvo != null) {
+      foundUser.interests.add(foundConvo.id);
+    }
+
+    return foundUser.interests;
   }
 
   @Override

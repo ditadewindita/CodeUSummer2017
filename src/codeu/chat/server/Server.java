@@ -175,6 +175,31 @@ public final class Server {
       }
     });
 
+    // Get interests
+    this.commands.put(NetworkCode.GET_INTERESTS_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid id = Uuid.SERIALIZER.read(in);
+        final Collection<Uuid> interests = view.getConvoInterests(id);
+
+        Serializers.INTEGER.write(out, NetworkCode.GET_INTERESTS_RESPONSE);
+        Serializers.collection(Uuid.SERIALIZER).write(out, interests);
+      }
+    });
+
+    // Add interests
+    this.commands.put(NetworkCode.NEW_INTEREST_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Uuid convoId = Uuid.SERIALIZER.read(in);
+        final Collection<Uuid> interests = controller.newConvoInterest(userId, convoId);
+
+        Serializers.INTEGER.write(out, NetworkCode.NEW_INTEREST_RESPONSE);
+        Serializers.collection(Uuid.SERIALIZER).write(out, interests);
+      }
+    });
+
     this.timeline.scheduleNow(new Runnable() {
       @Override
       public void run() {

@@ -57,4 +57,5 @@ public interface BasicView {
   //  Return the current server information
   ServerInfo getInfo();
 
+  Collection<Uuid> getConvoInterests(Uuid user);
 }

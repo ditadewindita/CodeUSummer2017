@@ -47,6 +47,16 @@ public final class UserContext {
     return null;
   }
 
+  public Collection<Uuid> addConvoInterest(Uuid id){
+    final Collection<Uuid> interests = controller.newConvoInterest(this.user.id, id);
+
+    return interests;
+  }
+
+  public Collection<Uuid> getConvoInterests(){
+    return view.getConvoInterests(this.user.id);
+  }
+
   public HashMap<Uuid, ConversationContext> conversations() {
     // Use all the ids to get all the conversations and convert them to
     // Conversation Contexts.

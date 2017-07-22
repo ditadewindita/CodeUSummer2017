@@ -70,7 +70,7 @@ public final class Model {
   private final Store<Time, User> userByTime = new Store<>(TIME_COMPARE);
   private final Store<String, User> userByText = new Store<>(STRING_COMPARE);
   // ADDED
-  private final Store<Collection<Uuid>, User> userByInterest = new Store<>(COLLECTION_COMPARATOR);
+  private final Store<Uuid, Collection<Uuid>> userByInterest = new Store<>(UUID_COMPARE);
 
   private final Store<Uuid, ConversationHeader> conversationById = new Store<>(UUID_COMPARE);
   private final Store<Time, ConversationHeader> conversationByTime = new Store<>(TIME_COMPARE);
@@ -86,8 +86,7 @@ public final class Model {
     userById.insert(user.id, user);
     userByTime.insert(user.creation, user);
     userByText.insert(user.name, user);
-    // ADDED
-    userByInterest.insert(user.interests, user);
+    userByInterest.insert(user.id, user.interests);
   }
 
   public StoreAccessor<Uuid, User> userById() {
@@ -103,7 +102,7 @@ public final class Model {
   }
 
   // ADDED
-  public StoreAccessor<Collection<Uuid>, User> userByInterest() { return userByInterest; }
+  public StoreAccessor<Uuid, Collection<Uuid>> userByInterest() { return userByInterest; }
 
   public void add(ConversationHeader conversation) {
     conversationById.insert(conversation.id, conversation);
