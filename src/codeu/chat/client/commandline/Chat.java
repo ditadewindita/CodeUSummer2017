@@ -291,10 +291,6 @@ public final class Chat {
       @Override
       public void invoke(List<String> args) {
         System.out.println("USER MODE");
-        System.out.println("  LIST-INTERESTS");
-        System.out.println("    Print out 'interests' set in User object -- DEBUG FEATURE");
-        System.out.println("  ADD-INTERESTS");
-        System.out.println("    Add an 'interest' to set in User object -- DEBUG FEATURE");
         System.out.println("  c-list");
         System.out.println("    List all conversations that the current user can interact with.");
         System.out.println("  c-add <title>");
@@ -321,30 +317,6 @@ public final class Chat {
         System.out.println("    Go back to ROOT MODE.");
         System.out.println("  exit");
         System.out.println("    Exit the program.");
-      }
-    });
-
-    panel.register("LIST-INTERESTS", new Panel.Command() {
-      @Override
-      public void invoke(List<String> args) {
-        for(Uuid u : user.getConvoInterests())
-          System.out.format("USER NAME: %s (UUID: %s)\n", findConversation(u).conversation.title, u);
-      }
-    });
-
-    panel.register("ADD-INTERESTS", new Panel.Command() {
-      @Override
-      public void invoke(List<String> args) {
-        final String name = args.size() > 0 ? String.join(" ", args) : "";
-        if(name.length() > 0) {
-          final ConversationContext addConvo = findConversation(name);
-          if (addConvo == null)
-            System.out.println("User not found!");
-          else
-            user.addConversationInterest(addConvo.conversation.id);
-        } else {
-          System.out.println("ERROR: Missing <title>");
-        }
       }
     });
 
@@ -380,6 +352,7 @@ public final class Chat {
             System.out.println("ERROR: Failed to create new conversation");
           } else {
             panels.push(createConversationPanel(conversation));
+
 
             // If this user isn't in the new conversations map, add them with a new Set
             Set<Uuid> newConversations = newConversationsMap.computeIfAbsent(user.user.id, id -> new HashSet<>());
@@ -454,7 +427,7 @@ public final class Chat {
     panel.register("c-interest-list", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
-        Collection<Uuid> interestedConvos = user.getConvoInterests();
+        Collection<Uuid> interestedConvos = user.getConversationInterests();
         if(interestedConvos != null){
           for (final Uuid convoID : interestedConvos) {
             final ConversationContext conversation = findConversation(convoID);

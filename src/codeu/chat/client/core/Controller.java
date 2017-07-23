@@ -16,6 +16,8 @@ package codeu.chat.client.core;
 
 import java.security.spec.ECField;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 import codeu.chat.common.BasicController;
 import codeu.chat.common.ConversationHeader;
@@ -24,6 +26,7 @@ import codeu.chat.common.NetworkCode;
 import codeu.chat.common.User;
 import codeu.chat.util.Logger;
 import codeu.chat.util.Serializers;
+import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
 import codeu.chat.util.connections.ConnectionSource;
@@ -36,6 +39,30 @@ public class Controller implements BasicController {
 
   public Controller(ConnectionSource source) {
     this.source = source;
+  }
+
+  @Override
+  public Map<Uuid, Time> newUpdatedConversation(Uuid user, Uuid convo, Time time){
+    Map<Uuid, Time> response = null;
+
+    try(final Connection connection = source.connect()){
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.NEW_UPDATED_CONVERSATION_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), user);
+      Uuid.SERIALIZER.write(connection.out(), convo);
+      Time.SERIALIZER.write(connection.out(), time);
+
+      if(Serializers.INTEGER.read(connection.in()) == NetworkCode.NEW_UPDATED_CONVERSATION_RESPONSE){
+        response = Serializers.map(Uuid.SERIALIZER, Time.SERIALIZER).read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+    } catch (Exception ex){
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+
+    return response;
   }
 
   @Override

@@ -17,6 +17,7 @@ package codeu.chat.server;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Map;
 
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
@@ -60,6 +61,7 @@ public final class Model {
 
   private final Store<Uuid, Collection<Uuid>> userByConversationInterest = new Store<>(UUID_COMPARE);
   private final Store<Uuid, Collection<Uuid>> userByUserInterest = new Store<>(UUID_COMPARE);
+  private final Store<Uuid, Map<Uuid, Time>> userByUpdatedConversations = new Store<>(UUID_COMPARE);
 
   private final Store<Uuid, ConversationHeader> conversationById = new Store<>(UUID_COMPARE);
   private final Store<Time, ConversationHeader> conversationByTime = new Store<>(TIME_COMPARE);
@@ -77,6 +79,7 @@ public final class Model {
     userByText.insert(user.name, user);
     userByConversationInterest.insert(user.id, user.conversationInterests);
     userByUserInterest.insert(user.id, user.userInterests);
+    userByUpdatedConversations.insert(user.id, user.updatedConversations);
   }
 
   public StoreAccessor<Uuid, User> userById() {
@@ -94,6 +97,8 @@ public final class Model {
   public StoreAccessor<Uuid, Collection<Uuid>> userByConversationInterest() { return userByConversationInterest; }
 
   public StoreAccessor<Uuid, Collection<Uuid>> userbyUserInterest() { return userByUserInterest; }
+
+  public StoreAccessor<Uuid, Map<Uuid, Time>> userByUpdatedConversations() { return userByUpdatedConversations; }
 
   public void add(ConversationHeader conversation) {
     conversationById.insert(conversation.id, conversation);

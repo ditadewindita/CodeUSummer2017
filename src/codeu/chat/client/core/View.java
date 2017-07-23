@@ -16,6 +16,8 @@ package codeu.chat.client.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import codeu.chat.common.*;
 import codeu.chat.util.Logger;
@@ -24,6 +26,7 @@ import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
 import codeu.chat.util.connections.ConnectionSource;
+import com.sun.org.apache.xpath.internal.axes.HasPositionalPredChecker;
 
 // VIEW
 //
@@ -38,6 +41,29 @@ public class View implements BasicView {
 
   public View(ConnectionSource source) {
     this.source = source;
+  }
+
+  @Override
+  public Map<Uuid, Time> getUpdatedConversations(Uuid user){
+    final Map<Uuid, Time> conversations = new HashMap<>();
+
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.GET_UPDATED_CONVERSATIONS_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), user);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.GET_UPDATED_CONVERSATIONS_RESPONSE) {
+        conversations.putAll(Serializers.map(Uuid.SERIALIZER, Time.SERIALIZER).read(connection.in()));
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (Exception ex) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+
+    return conversations;
   }
 
   @Override

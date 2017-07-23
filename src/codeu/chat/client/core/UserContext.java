@@ -47,15 +47,11 @@ public final class UserContext {
     return null;
   }
 
-  public Collection<Uuid> addConversationInterest(Uuid id){
-    return controller.newConversationInterest(this.user.id, id);
-  }
+  public Collection<Uuid> addConversationInterest(Uuid id){ return controller.newConversationInterest(this.user.id, id); }
 
-  public Collection<Uuid> removeConversationInterest(Uuid id){
-    return controller.removeConversationInterest(this.user.id, id);
-  }
+  public Collection<Uuid> removeConversationInterest(Uuid id){ return controller.removeConversationInterest(this.user.id, id); }
 
-  public Collection<Uuid> getConvoInterests(){
+  public Collection<Uuid> getConversationInterests(){
     return view.getConversationInterests(this.user.id);
   }
 

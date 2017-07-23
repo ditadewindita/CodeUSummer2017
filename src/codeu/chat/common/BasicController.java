@@ -14,9 +14,12 @@
 
 package codeu.chat.common;
 
+import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 // BASIC CONTROLLER
 //
@@ -80,4 +83,11 @@ public interface BasicController {
   //  If successful, the method will return the collection of users
   //  the user is currently interested in.
   Collection<Uuid> removeUserInterest(Uuid user1, Uuid user2);
+
+  // NEW UPDATED CONVERSATION
+  //
+  //  Add a conversation to a user's list of updated conversations.
+  //  If successful, the method will return the collection of updated
+  //  conversations the user is currently interested in.
+  Map<Uuid, Time> newUpdatedConversation(Uuid user, Uuid convo, Time time);
 }

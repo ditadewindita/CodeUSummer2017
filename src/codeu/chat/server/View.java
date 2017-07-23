@@ -14,13 +14,11 @@
 
 package codeu.chat.server;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 import codeu.chat.common.*;
 import codeu.chat.util.Logger;
+import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.store.StoreAccessor;
 
@@ -52,14 +50,13 @@ public final class View implements BasicView, SinglesView {
   }
 
   @Override
-  public Collection<Uuid> getConversationInterests(Uuid user){
-    return model.userByConversationInterest().first(user);
-  }
+  public Map<Uuid, Time> getUpdatedConversations(Uuid user){ return model.userByUpdatedConversations().first(user); }
 
   @Override
-  public Collection<Uuid> getUserInterests(Uuid user){
-    return model.userbyUserInterest().first(user);
-  }
+  public Collection<Uuid> getConversationInterests(Uuid user){ return model.userByConversationInterest().first(user); }
+
+  @Override
+  public Collection<Uuid> getUserInterests(Uuid user){ return model.userbyUserInterest().first(user); }
 
   @Override
   public ServerInfo getInfo() {

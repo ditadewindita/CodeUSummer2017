@@ -15,11 +15,13 @@
 package codeu.chat.common;
 
 import java.util.Collection;
+import java.util.Map;
 
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
 import codeu.chat.common.Message;
 import codeu.chat.common.User;
+import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 
 // BASIC VIEW
@@ -66,4 +68,9 @@ public interface BasicView {
   //
   //  Return the passed user's list of interested conversations
   Collection<Uuid> getUserInterests(Uuid user);
+
+  // GET UPDATED CONVERSATIONS
+  //
+  //  Return the passsed user's list of updated conversations
+  Map<Uuid, Time> getUpdatedConversations(Uuid user);
 }
