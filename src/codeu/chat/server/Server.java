@@ -359,9 +359,9 @@ public final class Server {
     BufferedReader bufferedReader = new BufferedReader(fileReader);
 
     // Read the header lines of each transaction log
-    String line = bufferedReader.readLine();
+    String line;
 
-    while(line != null) {
+    while((line = bufferedReader.readLine()) != null) {
 
       // Instantiate a Tokenizer to parse through log's data
       Tokenizer logInfo = new Tokenizer(line);
@@ -405,7 +405,31 @@ public final class Server {
         controller.newMessage(commandUuid, ownerUuid, convoUuid, messageContent, commandCreation);
       }
 
-      line = bufferedReader.readLine();
+      // INTEREST SYSTEM
+      else if(commandType.equals("ADD-INTEREST-USER")){
+        Uuid owner = Uuid.parse(logInfo.next());
+        Uuid follow = Uuid.parse(logInfo.next());
+
+        controller.newUserInterest(owner, follow);
+      }
+      else if(commandType.equals("REMOVE-INTEREST-USER")){
+        Uuid owner = Uuid.parse(logInfo.next());
+        Uuid follow = Uuid.parse(logInfo.next());
+
+        controller.removeUserInterest(owner, follow);
+      }
+      else if(commandType.equals("ADD-INTEREST-CONVERSATION")){
+        Uuid owner = Uuid.parse(logInfo.next());
+        Uuid follow = Uuid.parse(logInfo.next());
+
+        controller.newConversationInterest(owner, follow);
+      }
+      else if(commandType.equals("REMOVE-INTEREST-CONVERSATION")){
+        Uuid owner = Uuid.parse(logInfo.next());
+        Uuid follow = Uuid.parse(logInfo.next());
+
+        controller.removeConversationInterest(owner, follow);
+      }
     }
 
     LOG.info("Successfully restored last logged server state.");

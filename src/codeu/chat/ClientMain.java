@@ -47,34 +47,8 @@ final class ClientMain {
 
       String commandType = logInfo.next();
 
-      // INTEREST SYSTEM
-      if(commandType.equals("ADD-INTEREST-USER")){
-        Uuid owner = Uuid.parse(logInfo.next());
-        Uuid follow = Uuid.parse(logInfo.next());
-
-        chat.addUserInterest(owner, follow, false);
-      }
-      else if(commandType.equals("REMOVE-INTEREST-USER")){
-        Uuid owner = Uuid.parse(logInfo.next());
-        Uuid follow = Uuid.parse(logInfo.next());
-
-        chat.removeUserInterest(owner, follow);
-      }
-      else if(commandType.equals("ADD-INTEREST-CONVERSATION")){
-        Uuid owner = Uuid.parse(logInfo.next());
-        Uuid follow = Uuid.parse(logInfo.next());
-
-        chat.addConvoInterest(owner, follow, false);
-      }
-      else if(commandType.equals("REMOVE-INTEREST-CONVERSATION")){
-        Uuid owner = Uuid.parse(logInfo.next());
-        Uuid follow = Uuid.parse(logInfo.next());
-
-        chat.removeConvoInterest(owner, follow);
-      }
-
       // ACCESS CONTROL
-      else if(commandType.equals("ADD-CONVO-CREATOR")){
+      if(commandType.equals("ADD-CONVO-CREATOR")){
         Uuid convo = Uuid.parse(logInfo.next());
         Uuid user = Uuid.parse(logInfo.next());
 
