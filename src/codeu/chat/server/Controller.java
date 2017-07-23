@@ -180,6 +180,7 @@ public final class Controller implements RawController, BasicController {
 
     if(foundUser != null && foundConvo != null) {
       foundUser.conversationInterests.add(foundConvo.id);
+      foundConvo.unseenMessages.put(foundUser.id, 0);
 
       LOG.info(
               "newConversationInterest success (user.id=%s conversation.id=%s)",

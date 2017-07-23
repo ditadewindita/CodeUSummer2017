@@ -407,28 +407,24 @@ public final class Server {
 
       // INTEREST SYSTEM
       else if(commandType.equals("ADD-INTEREST-USER")){
-        Uuid owner = Uuid.parse(logInfo.next());
         Uuid follow = Uuid.parse(logInfo.next());
 
-        controller.newUserInterest(owner, follow);
+        controller.newUserInterest(commandUuid, follow);
       }
       else if(commandType.equals("REMOVE-INTEREST-USER")){
-        Uuid owner = Uuid.parse(logInfo.next());
         Uuid follow = Uuid.parse(logInfo.next());
 
-        controller.removeUserInterest(owner, follow);
+        controller.removeUserInterest(commandUuid, follow);
       }
       else if(commandType.equals("ADD-INTEREST-CONVERSATION")){
-        Uuid owner = Uuid.parse(logInfo.next());
         Uuid follow = Uuid.parse(logInfo.next());
 
-        controller.newConversationInterest(owner, follow);
+        controller.newConversationInterest(commandUuid, follow);
       }
       else if(commandType.equals("REMOVE-INTEREST-CONVERSATION")){
-        Uuid owner = Uuid.parse(logInfo.next());
         Uuid follow = Uuid.parse(logInfo.next());
 
-        controller.removeConversationInterest(owner, follow);
+        controller.removeConversationInterest(commandUuid, follow);
       }
     }
 

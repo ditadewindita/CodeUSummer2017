@@ -596,6 +596,8 @@ public final class Chat {
         Collection<Uuid> interestedUsers = user.getUserInterests();
         Collection<Uuid> interestedConversations = user.getConversationInterests();
 
+        if(interestedUsers.size() == 0 && interestedConversations.size() == 0)
+          System.out.println("\tNo updates!");
         // Only check updates if the user is following at least one person
         if(interestedUsers.size() != 0){
           System.out.println("============= Followed Users: =============");

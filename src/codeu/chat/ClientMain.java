@@ -38,8 +38,6 @@ final class ClientMain {
     // Read the header lines of each transaction log
     String line;
 
-    System.out.println("Loading interest system...");
-
     while((line = bufferedReader.readLine()) != null) {
 
       // Instantiate a Tokenizer to parse through log's data
@@ -87,8 +85,6 @@ final class ClientMain {
     }
 
     LOG.info("Successfully restored last logged interest system state.");
-
-    System.out.println("Successfully loaded interest system!");
 
     bufferedReader.close();
   }
