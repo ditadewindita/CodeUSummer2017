@@ -74,6 +74,12 @@ public final class Store<KEY, VALUE> implements StoreAccessor<KEY, VALUE> {
   }
 
   @Override
+  public VALUE last(KEY key) {
+    final StoreLink<KEY, VALUE> link = index.tailMap(key).get(key);
+    return link == null ? null : link.value;
+  }
+
+  @Override
   public Iterable<VALUE> all() {
     return new LinkIterable<KEY, VALUE>(comparator, first(), last());
   }

@@ -26,7 +26,6 @@ import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.connections.Connection;
 import codeu.chat.util.connections.ConnectionSource;
-import com.sun.org.apache.xpath.internal.axes.HasPositionalPredChecker;
 
 // VIEW
 //
@@ -41,6 +40,49 @@ public class View implements BasicView {
 
   public View(ConnectionSource source) {
     this.source = source;
+  }
+
+  @Override
+  public Integer getUnseenMessagesCount(Uuid user, Uuid convo){
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.GET_USER_MESSAGE_COUNT_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), user);
+      Uuid.SERIALIZER.write(connection.out(), convo);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.GET_USER_MESSAGE_COUNT_RESPONSE) {
+        return Serializers.INTEGER.read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (Exception ex) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+
+    return 0;
+  }
+
+  @Override
+  public Time getLastStatusUpdate(Uuid user){
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.GET_USER_LAST_STATUS_UPDATE_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), user);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.GET_USER_LAST_STATUS_UPDATE_RESPONSE) {
+        return Time.SERIALIZER.read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (Exception ex) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+
+    return null;
   }
 
   @Override

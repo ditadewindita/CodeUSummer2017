@@ -14,10 +14,7 @@
 
 package codeu.chat.server;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
@@ -62,10 +59,13 @@ public final class Model {
   private final Store<Uuid, Collection<Uuid>> userByConversationInterest = new Store<>(UUID_COMPARE);
   private final Store<Uuid, Collection<Uuid>> userByUserInterest = new Store<>(UUID_COMPARE);
   private final Store<Uuid, Map<Uuid, Time>> userByUpdatedConversations = new Store<>(UUID_COMPARE);
+  private final Store<Uuid, Time> userByStatusUpdate = new Store<>(UUID_COMPARE);
 
   private final Store<Uuid, ConversationHeader> conversationById = new Store<>(UUID_COMPARE);
   private final Store<Time, ConversationHeader> conversationByTime = new Store<>(TIME_COMPARE);
   private final Store<String, ConversationHeader> conversationByText = new Store<>(STRING_COMPARE);
+
+  private final Store<Uuid, HashMap<Uuid, Integer>> conversationByUnseenMessages = new Store<>(UUID_COMPARE);
 
   private final Store<Uuid, ConversationPayload> conversationPayloadById = new Store<>(UUID_COMPARE);
 
@@ -77,9 +77,11 @@ public final class Model {
     userById.insert(user.id, user);
     userByTime.insert(user.creation, user);
     userByText.insert(user.name, user);
+
     userByConversationInterest.insert(user.id, user.conversationInterests);
     userByUserInterest.insert(user.id, user.userInterests);
     userByUpdatedConversations.insert(user.id, user.updatedConversations);
+    userByStatusUpdate.insert(user.id, user.creation);
   }
 
   public StoreAccessor<Uuid, User> userById() {
@@ -100,11 +102,15 @@ public final class Model {
 
   public StoreAccessor<Uuid, Map<Uuid, Time>> userByUpdatedConversations() { return userByUpdatedConversations; }
 
+  public StoreAccessor<Uuid, Time> userByStatusUpdate() { return userByStatusUpdate; }
+
   public void add(ConversationHeader conversation) {
     conversationById.insert(conversation.id, conversation);
     conversationByTime.insert(conversation.creation, conversation);
     conversationByText.insert(conversation.title, conversation);
     conversationPayloadById.insert(conversation.id, new ConversationPayload(conversation.id));
+
+    conversationByUnseenMessages.insert(conversation.id, conversation.unseenMessages);
   }
 
   public StoreAccessor<Uuid, ConversationHeader> conversationById() {
@@ -122,6 +128,8 @@ public final class Model {
   public StoreAccessor<Uuid, ConversationPayload> conversationPayloadById() {
     return conversationPayloadById;
   }
+
+  public StoreAccessor<Uuid, HashMap<Uuid, Integer>> conversationByUnseenMessages() { return conversationByUnseenMessages; }
 
   public void add(Message message) {
     messageById.insert(message.id, message);

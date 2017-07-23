@@ -40,6 +40,9 @@ public final class View implements BasicView, SinglesView {
   }
 
   @Override
+  public Time getLastStatusUpdate(Uuid user){ return model.userById().first(user).lastStatusUpdate; }
+
+  @Override
   public Collection<ConversationHeader> getConversations() {
     return all(model.conversationById());
   }
@@ -47,6 +50,11 @@ public final class View implements BasicView, SinglesView {
   @Override
   public Collection<ConversationPayload> getConversationPayloads(Collection<Uuid> ids) {
     return intersect(model.conversationPayloadById(), ids);
+  }
+
+  @Override
+  public Integer getUnseenMessagesCount(Uuid user, Uuid convo){
+    return model.conversationByUnseenMessages().first(convo).get(user);
   }
 
   @Override

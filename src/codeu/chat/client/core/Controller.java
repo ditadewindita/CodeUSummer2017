@@ -42,6 +42,53 @@ public class Controller implements BasicController {
   }
 
   @Override
+  public Integer updateUsersUnseenMessagesCount(Uuid user, Uuid convo, Integer count){
+    Integer response = 0;
+
+    try(final Connection connection = source.connect()){
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.UPDATE_USER_MESSAGE_COUNT_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), user);
+      Uuid.SERIALIZER.write(connection.out(), convo);
+      Serializers.INTEGER.write(connection.out(), count);
+
+      if(Serializers.INTEGER.read(connection.in()) == NetworkCode.UPDATE_USER_MESSAGE_COUNT_RESPONSE){
+        response = Serializers.INTEGER.read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+    } catch (Exception ex){
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+
+    return response;
+  }
+
+  @Override
+  public Time updateUsersLastStatusUpdate(Uuid user, Time time){
+    Time response = null;
+
+    try(final Connection connection = source.connect()){
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.UPDATE_USER_LAST_STATUS_UPDATE_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), user);
+      Time.SERIALIZER.write(connection.out(), time);
+
+      if(Serializers.INTEGER.read(connection.in()) == NetworkCode.UPDATE_USER_LAST_STATUS_UPDATE_RESPONSE){
+        response = Time.SERIALIZER.read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+    } catch (Exception ex){
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+
+    return response;
+  }
+
+  @Override
   public Map<Uuid, Time> newUpdatedConversation(Uuid user, Uuid convo, Time time){
     Map<Uuid, Time> response = null;
 

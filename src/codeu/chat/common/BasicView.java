@@ -73,4 +73,14 @@ public interface BasicView {
   //
   //  Return the passsed user's list of updated conversations
   Map<Uuid, Time> getUpdatedConversations(Uuid user);
+
+  // GET LAST STATUS UPDATE
+  //
+  //  Return the last time a user requested their status update
+  Time getLastStatusUpdate(Uuid user);
+
+  // GET UNSEEN MESSAGES COUNT
+  //
+  //  Returns the number of messages this user hasn't seen in a specific conversation
+  Integer getUnseenMessagesCount(Uuid user, Uuid convo);
 }

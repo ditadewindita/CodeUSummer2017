@@ -251,6 +251,85 @@ public final class Server {
       }
     });
 
+    // Add Updated Conversation - A client wants to add a conversation to their list of updated conversations
+    this.commands.put(NetworkCode.NEW_UPDATED_CONVERSATION_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Uuid convoId = Uuid.SERIALIZER.read(in);
+        final Time time = Time.SERIALIZER.read(in);
+        final Map<Uuid, Time> updated = controller.newUpdatedConversation(userId, convoId, time);
+
+        Serializers.INTEGER.write(out, NetworkCode.NEW_UPDATED_CONVERSATION_RESPONSE);
+        Serializers.map(Uuid.SERIALIZER, Time.SERIALIZER).write(out, updated);
+      }
+    });
+
+    // Get Updated Conversations - A client wants to view their updated conversations
+    this.commands.put(NetworkCode.GET_UPDATED_CONVERSATIONS_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Map<Uuid, Time> updated = view.getUpdatedConversations(userId);
+
+        Serializers.INTEGER.write(out, NetworkCode.GET_UPDATED_CONVERSATIONS_RESPONSE);
+        Serializers.map(Uuid.SERIALIZER, Time.SERIALIZER).write(out, updated);
+      }
+    });
+
+    // Update User's Last Status Update - A client wants to update their last status update time
+    this.commands.put(NetworkCode.UPDATE_USER_LAST_STATUS_UPDATE_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Time update = Time.SERIALIZER.read(in);
+        final Time lastUpdate = controller.updateUsersLastStatusUpdate(userId, update);
+
+        Serializers.INTEGER.write(out, NetworkCode.UPDATE_USER_LAST_STATUS_UPDATE_RESPONSE);
+        Time.SERIALIZER.write(out, lastUpdate);
+      }
+    });
+
+    // Get User's Last Status Update - A client wants to get their last status update time
+    this.commands.put(NetworkCode.GET_USER_LAST_STATUS_UPDATE_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Time update = view.getLastStatusUpdate(userId);
+
+        Serializers.INTEGER.write(out, NetworkCode.GET_USER_LAST_STATUS_UPDATE_RESPONSE);
+        Time.SERIALIZER.write(out, update);
+      }
+    });
+
+    // Get User's Unseen Messages Count - A client wants to see the number of messages that they have not viewed
+    this.commands.put(NetworkCode.GET_USER_MESSAGE_COUNT_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Uuid convoId = Uuid.SERIALIZER.read(in);
+        final Integer count = view.getUnseenMessagesCount(userId, convoId);
+
+        Serializers.INTEGER.write(out, NetworkCode.GET_USER_MESSAGE_COUNT_RESPONSE);
+        Serializers.INTEGER.write(out, count);
+      }
+    });
+
+    // Update User's Unseen Messages Count - A client wants to update the number of messages that they have not viewed
+    this.commands.put(NetworkCode.UPDATE_USER_MESSAGE_COUNT_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Uuid convoId = Uuid.SERIALIZER.read(in);
+        final Integer count = Serializers.INTEGER.read(in);
+        final Integer newCount = controller.updateUsersUnseenMessagesCount(userId, convoId, count);
+
+        Serializers.INTEGER.write(out, NetworkCode.UPDATE_USER_MESSAGE_COUNT_RESPONSE);
+        Serializers.INTEGER.write(out, newCount);
+      }
+    });
+
+
     this.timeline.scheduleNow(new Runnable() {
       @Override
       public void run() {

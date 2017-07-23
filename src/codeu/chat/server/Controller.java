@@ -58,6 +58,54 @@ public final class Controller implements RawController, BasicController {
   }
 
   @Override
+  public Integer updateUsersUnseenMessagesCount(Uuid user, Uuid convo, Integer count){
+    final User foundUser = model.userById().first(user);
+    final ConversationHeader foundConvo = model.conversationById().first(convo);
+
+    if(foundUser != null && foundConvo != null){
+      Integer currentCount = (foundConvo.unseenMessages.get(foundUser) == null) ? 0 : foundConvo.unseenMessages.get(foundUser);
+      Integer setCount = (currentCount + count < 0) ? 0 : currentCount + count;
+
+      foundConvo.unseenMessages.put(foundUser.id, setCount);
+
+      LOG.info(
+              "updateUsersUnseenMessagesCount success (user.id=%s conversation.id=%s count=%s)",
+              foundUser.id,
+              foundConvo.id,
+              setCount);
+    } else {
+      LOG.info(
+              "updateUsersUnseenMessagesCount fail (user.id=%s conversation.id=%s)",
+              foundUser.id,
+              foundConvo.id);
+    }
+
+    return foundConvo.unseenMessages.get(foundUser.id);
+  }
+
+  @Override
+  public Time updateUsersLastStatusUpdate(Uuid user, Time time){
+    final User foundUser = model.userById().first(user);
+
+    if(foundUser != null && time.inMs() > foundUser.creation.inMs()){
+      foundUser.lastStatusUpdate = time;
+
+      LOG.info(
+              "updateUsersLastStatusUpdate success (user.id=%s time=%s)",
+              foundUser.id,
+              time.inMs());
+    } else {
+
+      LOG.info(
+              "updateUsersLastStatusUpdate fail (user.id=%s time=%s)",
+              foundUser.id,
+              time.inMs());
+    }
+
+    return foundUser.lastStatusUpdate;
+  }
+
+  @Override
   public Map<Uuid, Time> newUpdatedConversation(Uuid user, Uuid convo, Time time){
     final User foundUser = model.userById().first(user);
     final ConversationHeader foundConversation = model.conversationById().first(convo);

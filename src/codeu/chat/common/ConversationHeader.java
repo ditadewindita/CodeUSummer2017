@@ -56,11 +56,15 @@ public final class ConversationHeader {
   public final Time creation;
   public final String title;
 
+  public final HashMap<Uuid, Integer> unseenMessages;
+
   public ConversationHeader(Uuid id, Uuid owner, Time creation, String title) {
 
     this.id = id;
     this.owner = owner;
     this.creation = creation;
     this.title = title;
+    this.unseenMessages = new HashMap<>();
   }
+
 }

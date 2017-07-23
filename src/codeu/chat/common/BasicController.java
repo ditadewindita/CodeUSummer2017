@@ -90,4 +90,18 @@ public interface BasicController {
   //  If successful, the method will return the collection of updated
   //  conversations the user is currently interested in.
   Map<Uuid, Time> newUpdatedConversation(Uuid user, Uuid convo, Time time);
+
+  // UPDATE USER'S LAST STATUS UPDATE
+  //
+  //  Update the last recorded Time a specified user requested their status update.
+  //  If successful, the method will return said user's last status update time.
+  Time updateUsersLastStatusUpdate(Uuid user, Time update);
+
+  // UPDATE USER'S UNSEEN MESSAGES COUNT
+  //
+  //  Update the user's number of unseen messages using the passed integer. Since the
+  //  integer will either be - or +, it can be seen as subtracting/adding the passed value.
+  //  If successful, the method will return the user's message count for the specified conversation.
+  Integer updateUsersUnseenMessagesCount(Uuid user, Uuid convo, Integer count);
+
 }

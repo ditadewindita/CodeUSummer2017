@@ -88,4 +88,9 @@ public final class ConversationContext {
     final Iterator<Message> messages = view.getMessages(Arrays.asList(id)).iterator();
     return messages.hasNext() ? new MessageContext(messages.next(), view) : null;
   }
+
+  public Integer getUnseenMessagesCount(Uuid user){ return view.getUnseenMessagesCount(user, this.conversation.id); }
+
+  public Integer setUnseenMessagesCount(Uuid user, Integer count){ return controller.updateUsersUnseenMessagesCount(user, this.conversation.id, count); }
+
 }

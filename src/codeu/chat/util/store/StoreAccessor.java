@@ -18,6 +18,8 @@ public interface StoreAccessor<KEY, VALUE> {
 
   VALUE first(KEY key);
 
+  VALUE last(KEY key);
+
   Iterable<VALUE> all();
 
   Iterable<VALUE> at(KEY key);

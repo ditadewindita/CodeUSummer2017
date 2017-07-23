@@ -57,6 +57,7 @@ public final class User {
   public final Set<Uuid> conversationInterests;
   public final Set<Uuid> userInterests;
   public final HashMap<Uuid, Time> updatedConversations;
+  public Time lastStatusUpdate;
 
   public User(Uuid id, String name, Time creation) {
 
@@ -66,5 +67,6 @@ public final class User {
     this.conversationInterests = new HashSet<>();
     this.userInterests = new HashSet<>();
     this.updatedConversations = new HashMap<>();
+    this.lastStatusUpdate = this.creation;
   }
 }
