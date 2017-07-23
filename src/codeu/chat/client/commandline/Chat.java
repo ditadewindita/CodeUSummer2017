@@ -341,7 +341,7 @@ public final class Chat {
           if (addConvo == null)
             System.out.println("User not found!");
           else
-            user.addConvoInterest(addConvo.conversation.id);
+            user.addConversationInterest(addConvo.conversation.id);
         } else {
           System.out.println("ERROR: Missing <title>");
         }
@@ -385,6 +385,7 @@ public final class Chat {
             Set<Uuid> newConversations = newConversationsMap.computeIfAbsent(user.user.id, id -> new HashSet<>());
             newConversations.add(conversation.conversation.id);
             newConversationsMap.put(user.user.id, newConversations);
+
             transactionLog.add(String.format("ADD-CONVERSATION %s %s \"%s\" %s",
                     conversation.conversation.id,
                     conversation.conversation.owner,
@@ -453,7 +454,7 @@ public final class Chat {
     panel.register("c-interest-list", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
-        Set<Uuid> interestedConvos = convoInterestMap.get(user.user.id);
+        Collection<Uuid> interestedConvos = user.getConvoInterests();
         if(interestedConvos != null){
           for (final Uuid convoID : interestedConvos) {
             final ConversationContext conversation = findConversation(convoID);
@@ -482,7 +483,7 @@ public final class Chat {
           if (conversation == null) {
             System.out.format("ERROR: No conversation with name '%s'\n", name);
           } else {
-              addConvoInterest(user.user.id, conversation.conversation.id, true);
+              user.addConversationInterest(conversation.conversation.id);
 
               transactionLog.add(String.format("ADD-INTEREST-CONVERSATION %s %s",
                       user.user.id,
@@ -520,8 +521,10 @@ public final class Chat {
           final ConversationContext conversation = findConversation(name);
           if (conversation == null) {
             System.out.format("ERROR: No conversation with name '%s'\n", name);
+          } else if(!user.user.conversationInterests.contains(conversation.conversation.id)){
+            System.out.println("ERROR: This conversation isn't in the interest list!");
           } else {
-            removeConvoInterest(user.user.id, conversation.conversation.id);
+            user.removeConversationInterest(conversation.conversation.id);
 
             transactionLog.add(String.format("REMOVE-INTEREST-CONVERSATION %s %s",
                     user.user.id,
@@ -542,8 +545,9 @@ public final class Chat {
     panel.register("u-interest-list", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
-        if(userInterestMap.get(user.user.id) != null){
-          for (final Uuid userID : userInterestMap.get(user.user.id)) {
+        Collection<Uuid> userInterests = user.getUserInterests();
+        if(userInterests != null){
+          for (final Uuid userID : userInterests) {
             final UserContext user = findUser(userID);
             System.out.format(
                     "USER %s (UUID: %s)\n",
@@ -569,7 +573,7 @@ public final class Chat {
           if (interestUser == null) {
             System.out.format("ERROR: User '%s' does not exist.\n", name);
           } else {
-              addUserInterest(user.user.id, interestUser.user.id, true);
+              user.addUserInterest(interestUser.user.id);
 
               transactionLog.add(String.format("ADD-INTEREST-USER %s %s",
                       user.user.id,
@@ -595,8 +599,10 @@ public final class Chat {
           final UserContext interestUser = findUser(name);
           if (interestUser == null) {
             System.out.format("ERROR: User '%s' does not exist.\n", name);
+          } else if(!user.user.userInterests.contains(interestUser.user.id)){
+            System.out.println("ERROR: This user isn't in the interest list!");
           } else {
-            removeUserInterest(user.user.id, interestUser.user.id);
+            user.removeUserInterest(interestUser.user.id);
 
             transactionLog.add(String.format("REMOVE-INTEREST-USER %s %s",
                     user.user.id,

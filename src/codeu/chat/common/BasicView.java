@@ -57,5 +57,13 @@ public interface BasicView {
   //  Return the current server information
   ServerInfo getInfo();
 
-  Collection<Uuid> getConvoInterests(Uuid user);
+  // GET CONVERSATION INTERESTS
+  //
+  //  Return the passed user's list of interested conversations
+  Collection<Uuid> getConversationInterests(Uuid user);
+
+  // GET USER INTERESTS
+  //
+  //  Return the passed user's list of interested conversations
+  Collection<Uuid> getUserInterests(Uuid user);
 }

@@ -54,23 +54,12 @@ public final class Model {
 
   private static final Comparator<String> STRING_COMPARE = String.CASE_INSENSITIVE_ORDER;
 
-  // ADDED
-  private static final Comparator<Collection<Uuid>> COLLECTION_COMPARATOR = new Comparator<Collection<Uuid>>() {
-    @Override
-    public int compare(Collection<Uuid> o1, Collection<Uuid> o2) {
-      if(o1.containsAll(o2))
-        return -1;
-      else if(o2.containsAll(o1))
-        return 1;
-      return 0;
-    }
-  };
-
   private final Store<Uuid, User> userById = new Store<>(UUID_COMPARE);
   private final Store<Time, User> userByTime = new Store<>(TIME_COMPARE);
   private final Store<String, User> userByText = new Store<>(STRING_COMPARE);
-  // ADDED
-  private final Store<Uuid, Collection<Uuid>> userByInterest = new Store<>(UUID_COMPARE);
+
+  private final Store<Uuid, Collection<Uuid>> userByConversationInterest = new Store<>(UUID_COMPARE);
+  private final Store<Uuid, Collection<Uuid>> userByUserInterest = new Store<>(UUID_COMPARE);
 
   private final Store<Uuid, ConversationHeader> conversationById = new Store<>(UUID_COMPARE);
   private final Store<Time, ConversationHeader> conversationByTime = new Store<>(TIME_COMPARE);
@@ -86,7 +75,8 @@ public final class Model {
     userById.insert(user.id, user);
     userByTime.insert(user.creation, user);
     userByText.insert(user.name, user);
-    userByInterest.insert(user.id, user.interests);
+    userByConversationInterest.insert(user.id, user.conversationInterests);
+    userByUserInterest.insert(user.id, user.userInterests);
   }
 
   public StoreAccessor<Uuid, User> userById() {
@@ -101,8 +91,9 @@ public final class Model {
     return userByText;
   }
 
-  // ADDED
-  public StoreAccessor<Uuid, Collection<Uuid>> userByInterest() { return userByInterest; }
+  public StoreAccessor<Uuid, Collection<Uuid>> userByConversationInterest() { return userByConversationInterest; }
+
+  public StoreAccessor<Uuid, Collection<Uuid>> userbyUserInterest() { return userByUserInterest; }
 
   public void add(ConversationHeader conversation) {
     conversationById.insert(conversation.id, conversation);

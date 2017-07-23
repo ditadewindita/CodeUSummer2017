@@ -175,27 +175,78 @@ public final class Server {
       }
     });
 
-    // Get interests
-    this.commands.put(NetworkCode.GET_INTERESTS_REQUEST, new Command(){
+    // Get Conversation Interests - A client wants to see their list of interested conversations
+    this.commands.put(NetworkCode.GET_CONVERSATION_INTERESTS_REQUEST, new Command(){
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
         final Uuid id = Uuid.SERIALIZER.read(in);
-        final Collection<Uuid> interests = view.getConvoInterests(id);
+        final Collection<Uuid> interests = view.getConversationInterests(id);
 
-        Serializers.INTEGER.write(out, NetworkCode.GET_INTERESTS_RESPONSE);
+        Serializers.INTEGER.write(out, NetworkCode.GET_CONVERSATION_INTERESTS_RESPONSE);
         Serializers.collection(Uuid.SERIALIZER).write(out, interests);
       }
     });
 
-    // Add interests
-    this.commands.put(NetworkCode.NEW_INTEREST_REQUEST, new Command(){
+    // Add Conversation Interest - A client wants to add a new conversation to their list of interests
+    this.commands.put(NetworkCode.NEW_CONVERSATION_INTEREST_REQUEST, new Command(){
       @Override
       public void onMessage(InputStream in, OutputStream out) throws IOException {
         final Uuid userId = Uuid.SERIALIZER.read(in);
         final Uuid convoId = Uuid.SERIALIZER.read(in);
-        final Collection<Uuid> interests = controller.newConvoInterest(userId, convoId);
+        final Collection<Uuid> interests = controller.newConversationInterest(userId, convoId);
 
-        Serializers.INTEGER.write(out, NetworkCode.NEW_INTEREST_RESPONSE);
+        Serializers.INTEGER.write(out, NetworkCode.NEW_CONVERSATION_INTEREST_RESPONSE);
+        Serializers.collection(Uuid.SERIALIZER).write(out, interests);
+      }
+    });
+
+    // Get User Interests - A client wants to see their list of interested conversations
+    this.commands.put(NetworkCode.GET_USER_INTERESTS_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid id = Uuid.SERIALIZER.read(in);
+        final Collection<Uuid> interests = view.getUserInterests(id);
+
+        Serializers.INTEGER.write(out, NetworkCode.GET_USER_INTERESTS_RESPONSE);
+        Serializers.collection(Uuid.SERIALIZER).write(out, interests);
+      }
+    });
+
+    // Add User Interest - A client wants to add a new conversation to their list of interests
+    this.commands.put(NetworkCode.NEW_USER_INTEREST_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Uuid followedUserId = Uuid.SERIALIZER.read(in);
+        final Collection<Uuid> interests = controller.newUserInterest(userId, followedUserId);
+
+        Serializers.INTEGER.write(out, NetworkCode.NEW_USER_INTEREST_RESPONSE);
+        Serializers.collection(Uuid.SERIALIZER).write(out, interests);
+      }
+    });
+
+    // Remove User Interest - A client wants to add a new conversation to their list of interests
+    this.commands.put(NetworkCode.REMOVE_USER_INTEREST_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Uuid followedUserId = Uuid.SERIALIZER.read(in);
+        final Collection<Uuid> interests = controller.removeUserInterest(userId, followedUserId);
+
+        Serializers.INTEGER.write(out, NetworkCode.REMOVE_USER_INTEREST_RESPONSE);
+        Serializers.collection(Uuid.SERIALIZER).write(out, interests);
+      }
+    });
+
+    // Add Conversation Interest - A client wants to add a new conversation to their list of interests
+    this.commands.put(NetworkCode.REMOVE_CONVERSATION_INTEREST_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Uuid convoId = Uuid.SERIALIZER.read(in);
+        final Collection<Uuid> interests = controller.removeConversationInterest(userId, convoId);
+
+        Serializers.INTEGER.write(out, NetworkCode.REMOVE_CONVERSATION_INTEREST_RESPONSE);
         Serializers.collection(Uuid.SERIALIZER).write(out, interests);
       }
     });

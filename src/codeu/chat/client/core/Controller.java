@@ -38,16 +38,86 @@ public class Controller implements BasicController {
     this.source = source;
   }
 
-  public Collection<Uuid> newConvoInterest(Uuid user, Uuid convo){
+  @Override
+  public Collection<Uuid> newUserInterest(Uuid user1, Uuid user2){
     Collection<Uuid> response = null;
 
     try(final Connection connection = source.connect()){
 
-      Serializers.INTEGER.write(connection.out(), NetworkCode.NEW_INTEREST_REQUEST);
+      Serializers.INTEGER.write(connection.out(), NetworkCode.NEW_USER_INTEREST_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), user1);
+      Uuid.SERIALIZER.write(connection.out(), user2);
+
+      if(Serializers.INTEGER.read(connection.in()) == NetworkCode.NEW_USER_INTEREST_RESPONSE){
+        response = Serializers.collection(Uuid.SERIALIZER).read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+    } catch (Exception ex){
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+
+    return response;
+  }
+
+  @Override
+  public Collection<Uuid> removeUserInterest(Uuid user1, Uuid user2){
+    Collection<Uuid> response = null;
+
+    try(final Connection connection = source.connect()){
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.REMOVE_USER_INTEREST_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), user1);
+      Uuid.SERIALIZER.write(connection.out(), user2);
+
+      if(Serializers.INTEGER.read(connection.in()) == NetworkCode.REMOVE_USER_INTEREST_RESPONSE){
+        response = Serializers.collection(Uuid.SERIALIZER).read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+    } catch (Exception ex){
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+
+    return response;
+  }
+
+  @Override
+  public Collection<Uuid> newConversationInterest(Uuid user, Uuid convo){
+    Collection<Uuid> response = null;
+
+    try(final Connection connection = source.connect()){
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.NEW_CONVERSATION_INTEREST_REQUEST);
       Uuid.SERIALIZER.write(connection.out(), user);
       Uuid.SERIALIZER.write(connection.out(), convo);
 
-      if(Serializers.INTEGER.read(connection.in()) == NetworkCode.NEW_INTEREST_RESPONSE){
+      if(Serializers.INTEGER.read(connection.in()) == NetworkCode.NEW_CONVERSATION_INTEREST_RESPONSE){
+        response = Serializers.collection(Uuid.SERIALIZER).read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+    } catch (Exception ex){
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+
+    return response;
+  }
+
+  @Override
+  public Collection<Uuid> removeConversationInterest(Uuid user, Uuid convo){
+    Collection<Uuid> response = null;
+
+    try(final Connection connection = source.connect()){
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.REMOVE_CONVERSATION_INTEREST_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), user);
+      Uuid.SERIALIZER.write(connection.out(), convo);
+
+      if(Serializers.INTEGER.read(connection.in()) == NetworkCode.REMOVE_CONVERSATION_INTEREST_RESPONSE){
         response = Serializers.collection(Uuid.SERIALIZER).read(connection.in());
       } else {
         LOG.error("Response from server failed.");

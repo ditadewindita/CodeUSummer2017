@@ -53,5 +53,31 @@ public interface BasicController {
   //  Whether conversations can have the same title is undefined.
   ConversationHeader newConversation(String title, Uuid owner);
 
-  Collection<Uuid> newConvoInterest(Uuid user, Uuid convo);
+  // NEW CONVERSATION INTEREST
+  //
+  //  Add a conversation to a user's list of interested conversations.
+  //  If successful, the method will return the collection of conversations
+  //  the user is currently interested in.
+  Collection<Uuid> newConversationInterest(Uuid user, Uuid convo);
+
+  // REMOVE CONVERSATION INTEREST
+  //
+  //  Remove a conversation to a user's list of interested conversations.
+  //  If successful, the method will return the collection of conversations
+  //  the user is currently interested in.
+  Collection<Uuid> removeConversationInterest(Uuid user, Uuid convo);
+
+  // NEW USER INTEREST
+  //
+  //  Add a user to a user's list of interested users.
+  //  If successful, the method will return the collection of users
+  //  the user is currently interested in.
+  Collection<Uuid> newUserInterest(Uuid user1, Uuid user2);
+
+  // REMOVE USER INTEREST
+  //
+  //  Remove a user in a user's list of interested users.
+  //  If successful, the method will return the collection of users
+  //  the user is currently interested in.
+  Collection<Uuid> removeUserInterest(Uuid user1, Uuid user2);
 }

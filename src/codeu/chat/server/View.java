@@ -52,8 +52,13 @@ public final class View implements BasicView, SinglesView {
   }
 
   @Override
-  public Collection<Uuid> getConvoInterests(Uuid user){
-    return intersect(model.userByInterest(), user);
+  public Collection<Uuid> getConversationInterests(Uuid user){
+    return model.userByConversationInterest().first(user);
+  }
+
+  @Override
+  public Collection<Uuid> getUserInterests(Uuid user){
+    return model.userbyUserInterest().first(user);
   }
 
   @Override
@@ -107,9 +112,5 @@ public final class View implements BasicView, SinglesView {
     }
 
     return found;
-  }
-
-  private static <T> Collection<T> intersect(StoreAccessor<Uuid, Collection<T>> store, Uuid u){
-    return store.first(u);
   }
 }

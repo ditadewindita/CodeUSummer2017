@@ -41,15 +41,38 @@ public class View implements BasicView {
   }
 
   @Override
-  public Collection<Uuid> getConvoInterests(Uuid user){
+  public Collection<Uuid> getUserInterests(Uuid user){
     final Collection<Uuid> interests = new ArrayList<>();
 
     try (final Connection connection = source.connect()) {
 
-      Serializers.INTEGER.write(connection.out(), NetworkCode.GET_INTERESTS_REQUEST);
+      Serializers.INTEGER.write(connection.out(), NetworkCode.GET_USER_INTERESTS_REQUEST);
       Uuid.SERIALIZER.write(connection.out(), user);
 
-      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.GET_INTERESTS_RESPONSE) {
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.GET_USER_INTERESTS_RESPONSE) {
+        interests.addAll(Serializers.collection(Uuid.SERIALIZER).read(connection.in()));
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (Exception ex) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+
+    return interests;
+  }
+
+  @Override
+  public Collection<Uuid> getConversationInterests(Uuid user){
+    final Collection<Uuid> interests = new ArrayList<>();
+
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.GET_CONVERSATION_INTERESTS_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), user);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.GET_CONVERSATION_INTERESTS_RESPONSE) {
         interests.addAll(Serializers.collection(Uuid.SERIALIZER).read(connection.in()));
       } else {
         LOG.error("Response from server failed.");

@@ -47,14 +47,28 @@ public final class UserContext {
     return null;
   }
 
-  public Collection<Uuid> addConvoInterest(Uuid id){
-    final Collection<Uuid> interests = controller.newConvoInterest(this.user.id, id);
+  public Collection<Uuid> addConversationInterest(Uuid id){
+    return controller.newConversationInterest(this.user.id, id);
+  }
 
-    return interests;
+  public Collection<Uuid> removeConversationInterest(Uuid id){
+    return controller.removeConversationInterest(this.user.id, id);
   }
 
   public Collection<Uuid> getConvoInterests(){
-    return view.getConvoInterests(this.user.id);
+    return view.getConversationInterests(this.user.id);
+  }
+
+  public Collection<Uuid> addUserInterest(Uuid id){
+    return controller.newUserInterest(this.user.id, id);
+  }
+
+  public Collection<Uuid> removeUserInterest(Uuid id){
+    return controller.removeUserInterest(this.user.id, id);
+  }
+
+  public Collection<Uuid> getUserInterests(){
+    return view.getUserInterests(this.user.id);
   }
 
   public HashMap<Uuid, ConversationContext> conversations() {

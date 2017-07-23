@@ -56,15 +56,92 @@ public final class Controller implements RawController, BasicController {
     return newConversation(createId(), title, owner, Time.now());
   }
 
-  public Collection<Uuid> newConvoInterest(Uuid user, Uuid interest){
+  @Override
+  public Collection<Uuid> newUserInterest(Uuid user1, Uuid user2){
+    final User foundUser = model.userById().first(user1);
+    final User followedUser = model.userById().first(user2);
+
+    if(foundUser != null && followedUser != null) {
+      foundUser.userInterests.add(followedUser.id);
+
+      LOG.info(
+              "newUserInterest success (user.id=%s user.id=%s)",
+              foundUser.id,
+              followedUser.id);
+    } else {
+      LOG.info(
+              "newUserInterest fail - user/followed user doesn't exist (user.id=%s user.id=%s)",
+              foundUser.id,
+              followedUser.id);
+    }
+
+    return foundUser.userInterests;
+  }
+
+  @Override
+  public Collection<Uuid> removeUserInterest(Uuid user1, Uuid user2){
+    final User foundUser = model.userById().first(user1);
+    final User followedUser = model.userById().first(user2);
+
+    if(foundUser != null && followedUser != null) {
+      foundUser.userInterests.remove(followedUser.id);
+
+      LOG.info(
+              "removeUserInterest success (user.id=%s user.id=%s)",
+              foundUser.id,
+              followedUser.id);
+    } else {
+      LOG.info(
+              "removeUserInterest fail - user/followed user doesn't exist (user.id=%s user.id=%s)",
+              foundUser.id,
+              followedUser.id);
+    }
+
+    return foundUser.userInterests;
+  }
+
+  @Override
+  public Collection<Uuid> newConversationInterest(Uuid user, Uuid interest){
     final User foundUser = model.userById().first(user);
     final ConversationHeader foundConvo = model.conversationById().first(interest);
 
     if(foundUser != null && foundConvo != null) {
-      foundUser.interests.add(foundConvo.id);
+      foundUser.conversationInterests.add(foundConvo.id);
+
+      LOG.info(
+              "newConversationInterest success (user.id=%s conversation.id=%s)",
+              foundUser.id,
+              foundConvo.id);
+    } else {
+      LOG.info(
+              "newConversationInterest fail - user/conversation does not exist (user.id=%s conversation.id=%s)",
+              foundUser.id,
+              foundConvo.id);
     }
 
-    return foundUser.interests;
+    return foundUser.conversationInterests;
+  }
+
+  @Override
+  public Collection<Uuid> removeConversationInterest(Uuid user, Uuid interest){
+    final User foundUser = model.userById().first(user);
+    final ConversationHeader foundConvo = model.conversationById().first(interest);
+
+    if(foundUser != null && foundConvo != null) {
+      foundUser.conversationInterests.remove(foundConvo.id);
+
+      LOG.info(
+              "removeConversationInterest success (user.id=%s conversation.id=%s)",
+              foundUser.id,
+              foundConvo.id);
+    } else {
+      LOG.info(
+              "removeConversationInterest fail - user/conversation doesn't exist (user.id=%s conversation.id=%s)",
+              foundUser.id,
+              foundConvo.id);
+    }
+
+    return foundUser.conversationInterests;
   }
 
   @Override
