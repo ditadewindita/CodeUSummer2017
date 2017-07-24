@@ -73,7 +73,7 @@ final class ClientMain {
     GridBagConstraints rootConstraints = new GridBagConstraints();
     rootConstraints.fill = GridBagConstraints.BOTH;
     switchPanel.add(rootPanel, "rootPanel");
-    panelSwitcher.show(switchPanel, "rootPanel");
+    //panelSwitcher.show(switchPanel, "rootPanel");
 
     JPanel userList = new JPanel();
     userList.setLayout(new BoxLayout(userList, BoxLayout.Y_AXIS));
@@ -91,6 +91,7 @@ final class ClientMain {
     messages.setLayout(new FlowLayout());
     //TODO display the messages users are sending onto this messages JTextArea (I'm not sure if
     //a JTextArea is ideal for this, but this is just a placeholder for now
+    //Each panel uses the same message/text display panel
     //In root panel there are no messages being sent so this will remain blank
     rootConstraints.gridx = 1;
     rootConstraints.gridy = 0;
@@ -99,33 +100,104 @@ final class ClientMain {
     rootPanel.add(messages, rootConstraints);
 
     //Panel with command buttons and text input
-    JPanel inputPanel = new JPanel();
-    inputPanel.setLayout(new GridLayout(2, 1));
+    JPanel rootInputPanel = new JPanel();
+    rootInputPanel.setLayout(new GridLayout(2, 1));
     rootConstraints.gridx = 1;
     rootConstraints.gridy = 2;
     rootConstraints.gridwidth = 2;
     rootConstraints.gridheight = 1;
-    rootPanel.add(inputPanel, rootConstraints);
+    rootPanel.add(rootInputPanel, rootConstraints);
 
     //Text input to sign in/add user
-    JTextField messageInput = new JTextField(1);
-    inputPanel.add(messageInput);
+    JTextField rootTextInput = new JTextField(1);
+    rootInputPanel.add(rootTextInput);
     //TODO parse input and link it to the u-sign-in and u-add commands
 
     //Command buttons
-    JPanel buttonPanel = new JPanel();
-    buttonPanel.setLayout(new GridLayout(1, 5));
-    inputPanel.add(buttonPanel);
+    JPanel rootButtonPanel = new JPanel();
+    rootButtonPanel.setLayout(new GridLayout(1, 5));
+    rootInputPanel.add(rootButtonPanel);
     JButton listUsers = new JButton("List Users");
-    buttonPanel.add(listUsers);
+    rootButtonPanel.add(listUsers);
     JButton addUser = new JButton("Add User");
-    buttonPanel.add(addUser);
+    rootButtonPanel.add(addUser);
     JButton signIn = new JButton("Sign In");
-    buttonPanel.add(signIn);
+    rootButtonPanel.add(signIn);
     JButton info = new JButton("Info");
-    buttonPanel.add(info);
+    rootButtonPanel.add(info);
     JButton exit = new JButton("Exit");
-    buttonPanel.add(exit);
+    rootButtonPanel.add(exit);
+
+    //User panel holding user panel's GUI, same as root panel but different buttons
+    JPanel userPanel = new JPanel();
+    userPanel.setLayout(new GridBagLayout());
+    GridBagConstraints userConstraints = new GridBagConstraints();
+    userConstraints.fill = GridBagConstraints.BOTH;
+    switchPanel.add(userPanel, "userPanel");
+    panelSwitcher.show(switchPanel, "userPanel");
+
+    JPanel convoList = new JPanel();
+    convoList.setLayout(new BoxLayout(convoList, BoxLayout.Y_AXIS));
+    JButton dummyConvo = new JButton("convo 1");
+    convoList.add(dummyConvo);
+    //TODO (optional?) add a display of convos currently registered to Server to convoList panel
+    //would be displayed to the left of the panel of messages in the chat
+    userConstraints.gridx = 0;
+    userConstraints.gridy = 0;
+    userConstraints.gridwidth = 1;
+    userConstraints.gridheight = 3;
+    userPanel.add(convoList, userConstraints);
+
+    //message/text display window in user panel, should not display any messages in user panel
+    userConstraints.gridx = 1;
+    userConstraints.gridy = 0;
+    userConstraints.gridwidth = 2;
+    userConstraints.gridheight = 2;
+    userPanel.add(messages, userConstraints);
+
+    //Panel with command buttons and text input
+    JPanel userInputPanel = new JPanel();
+    userInputPanel.setLayout(new GridLayout(2, 1));
+    userConstraints.gridx = 1;
+    userConstraints.gridy = 2;
+    userConstraints.gridwidth = 2;
+    userConstraints.gridheight = 1;
+    rootPanel.add(userInputPanel, userConstraints);
+
+    //Text input to sign in/add user
+    JTextField userTextInput = new JTextField(1);
+    userInputPanel.add(userTextInput);
+    //TODO parse input and link it to the user panel's commands
+
+    //Command buttons
+    JPanel userButtonPanel = new JPanel();
+    userButtonPanel.setLayout(new GridLayout(1, 13));
+    userInputPanel.add(userButtonPanel);
+    JButton listConvos = new JButton("List Conversations");
+    userButtonPanel.add(listConvos);
+    JButton addConvo = new JButton("Add Conversation");
+    userButtonPanel.add(addConvo);
+    JButton joinConvo = new JButton("Join Conversation");
+    userButtonPanel.add(joinConvo);
+    JButton listInterestConvos = new JButton("List Interest Conversations");
+    userButtonPanel.add(listInterestConvos);
+    JButton addInterestConvo = new JButton("Add Interest Conversation");
+    userButtonPanel.add(addInterestConvo);
+    JButton removeInterestConvo = new JButton("Remove Interest Conversation");
+    userButtonPanel.add(removeInterestConvo);
+    JButton listInterestUsers = new JButton("List Interest Users");
+    userButtonPanel.add(listInterestUsers);
+    JButton addInterestUser = new JButton("Add Interest User");
+    userButtonPanel.add(addInterestUser);
+    JButton removeInterestUser = new JButton("Remove Interest User");
+    userButtonPanel.add(removeInterestUser);
+    JButton statusUpdate = new JButton("Status Update");
+    userButtonPanel.add(statusUpdate);
+    JButton userInfo = new JButton("info");
+    userButtonPanel.add(userInfo);
+    JButton userBack = new JButton("back");
+    userButtonPanel.add(userBack);
+    userButtonPanel.add(exit);
 
     window.pack();
     window.setVisible(true);
