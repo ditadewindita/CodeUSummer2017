@@ -162,7 +162,7 @@ final class ClientMain {
     userConstraints.gridy = 2;
     userConstraints.gridwidth = 2;
     userConstraints.gridheight = 1;
-    rootPanel.add(userInputPanel, userConstraints);
+    userPanel.add(userInputPanel, userConstraints);
 
     //Text input to sign in/add user
     JTextField userTextInput = new JTextField(1);
