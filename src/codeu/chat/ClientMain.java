@@ -33,7 +33,7 @@ final class ClientMain {
   private static final long BACKUP_RATE_IN_MS = 30000;
 
   private static Chat chat;
-
+//
   private static void reloadOldInterests() throws IOException {
     // Open the transaction log file for reading
     BufferedReader bufferedReader = new BufferedReader(new FileReader("data/transaction_log.txt"));
