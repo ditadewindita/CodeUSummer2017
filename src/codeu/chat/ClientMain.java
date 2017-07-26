@@ -48,24 +48,22 @@ final class ClientMain {
 
     //Overall panel that will hold all smaller panels
     JPanel backingPanel = new JPanel();
-    backingPanel.setLayout(new GridBagLayout());
-    GridBagConstraints backingConstraints = new GridBagConstraints();
-    backingConstraints.fill = GridBagConstraints.BOTH;
-    backingConstraints.gridx = 0;
-    backingConstraints.gridy = 0;
-    backingConstraints.gridwidth = 3;
-    backingConstraints.gridheight = 3;
-    backingPanel.setSize(700, 700);
+    backingPanel.setLayout(new BorderLayout(0,0));
+//	    GridBagConstraints backingConstraints = new GridBagConstraints();
+//	    backingConstraints.fill = GridBagConstraints.BOTH;
+//	    backingConstraints.gridx = 0;
+//	    backingConstraints.gridy = 0;
+//	    backingConstraints.gridwidth = 3;
+//	    backingConstraints.gridheight = 3;
     window.add(backingPanel);
     window.setContentPane(backingPanel);
 
     //Panel to hold top/main panels containing chat text and user buttons
     // panels will be switched based on where the user is in the chat app
     JPanel switchPanel = new JPanel(new CardLayout());
-    switchPanel.setSize(700, 700);
     CardLayout panelSwitcher = new CardLayout();
     switchPanel.setLayout(panelSwitcher);
-    backingPanel.add(switchPanel, backingConstraints);
+    backingPanel.add(switchPanel, BorderLayout.CENTER);
 
     //Root panel holding root panel's GUI
     JPanel rootPanel = new JPanel();
@@ -87,17 +85,14 @@ final class ClientMain {
     rootConstraints.gridheight = 3;
     rootPanel.add(userList, rootConstraints);
 
-    JTextArea messages = new JTextArea("Chat messages");
-    messages.setLayout(new FlowLayout());
-    //TODO display the messages users are sending onto this messages JTextArea (I'm not sure if
-    //a JTextArea is ideal for this, but this is just a placeholder for now
-    //Each panel uses the same message/text display panel
+    JTextArea rootTextDisplay = new JTextArea("Chat Messages", 20, 20);
+    rootTextDisplay.setLayout(new FlowLayout());
     //In root panel there are no messages being sent so this will remain blank
     rootConstraints.gridx = 1;
     rootConstraints.gridy = 0;
     rootConstraints.gridwidth = 2;
     rootConstraints.gridheight = 2;
-    rootPanel.add(messages, rootConstraints);
+    rootPanel.add(rootTextDisplay, rootConstraints);
 
     //Panel with command buttons and text input
     JPanel rootInputPanel = new JPanel();
@@ -115,8 +110,10 @@ final class ClientMain {
 
     //Command buttons
     JPanel rootButtonPanel = new JPanel();
-    rootButtonPanel.setLayout(new GridLayout(1, 5));
+    rootButtonPanel.setLayout(new GridLayout(1, 6));
     rootInputPanel.add(rootButtonPanel);
+    JButton rootHelp = new JButton("Help");
+    rootButtonPanel.add(rootHelp);
     JButton listUsers = new JButton("List Users");
     rootButtonPanel.add(listUsers);
     JButton addUser = new JButton("Add User");
@@ -127,6 +124,7 @@ final class ClientMain {
     rootButtonPanel.add(info);
     JButton exit = new JButton("Exit");
     rootButtonPanel.add(exit);
+
 
     //User panel holding user panel's GUI, same as root panel but different buttons
     JPanel userPanel = new JPanel();
@@ -149,11 +147,13 @@ final class ClientMain {
     userPanel.add(convoList, userConstraints);
 
     //message/text display window in user panel, should not display any messages in user panel
+    JTextArea userTextDisplay = new JTextArea("Chat Messages", 20, 20);
+    userTextDisplay.setLayout(new FlowLayout());
     userConstraints.gridx = 1;
     userConstraints.gridy = 0;
     userConstraints.gridwidth = 2;
     userConstraints.gridheight = 2;
-    userPanel.add(messages, userConstraints);
+    userPanel.add(userTextDisplay, userConstraints);
 
     //Panel with command buttons and text input
     JPanel userInputPanel = new JPanel();
@@ -164,15 +164,17 @@ final class ClientMain {
     userConstraints.gridheight = 1;
     userPanel.add(userInputPanel, userConstraints);
 
-    //Text input to sign in/add user
+    //Text input for user panel commands
     JTextField userTextInput = new JTextField(1);
     userInputPanel.add(userTextInput);
     //TODO parse input and link it to the user panel's commands
 
     //Command buttons
     JPanel userButtonPanel = new JPanel();
-    userButtonPanel.setLayout(new GridLayout(1, 13));
+    userButtonPanel.setLayout(new GridLayout(2, 7));
     userInputPanel.add(userButtonPanel);
+    JButton userHelp = new JButton("Help");
+    userButtonPanel.add(userHelp);
     JButton listConvos = new JButton("List Conversations");
     userButtonPanel.add(listConvos);
     JButton addConvo = new JButton("Add Conversation");
@@ -193,11 +195,79 @@ final class ClientMain {
     userButtonPanel.add(removeInterestUser);
     JButton statusUpdate = new JButton("Status Update");
     userButtonPanel.add(statusUpdate);
-    JButton userInfo = new JButton("info");
+    JButton userInfo = new JButton("Info");
     userButtonPanel.add(userInfo);
-    JButton userBack = new JButton("back");
+    JButton userBack = new JButton("Back");
     userButtonPanel.add(userBack);
-    userButtonPanel.add(exit);
+    JButton userExit = new JButton("Exit");
+    userButtonPanel.add(userExit);
+
+
+    //Conversation panel holding conversation panel's GUI, same as root panel but different buttons
+    JPanel convoPanel = new JPanel();
+    convoPanel.setLayout(new GridBagLayout());
+    GridBagConstraints convoConstraints = new GridBagConstraints();
+    convoConstraints.fill = GridBagConstraints.BOTH;
+    switchPanel.add(convoPanel, "convoPanel");
+//		panelSwitcher.show(switchPanel, "convoPanel");
+
+    JPanel convoUsersList = new JPanel();
+    convoUsersList.setLayout(new BoxLayout(convoUsersList, BoxLayout.Y_AXIS));
+    JButton dummyConvoUser = new JButton("convo 1");
+    convoUsersList.add(dummyConvoUser);
+    //TODO (optional?) add a display of users currently in the covo to the convoUsersList panel
+    //would be displayed to the left of the panel of messages in the chat
+    convoConstraints.gridx = 0;
+    convoConstraints.gridy = 0;
+    convoConstraints.gridwidth = 1;
+    convoConstraints.gridheight = 3;
+    convoPanel.add(convoUsersList, convoConstraints);
+
+    //message/text display window in user panel, should display any messages while in convo panel
+    JTextArea messages = new JTextArea("Chat Messages", 20, 20);
+    messages.setLayout(new FlowLayout());
+    convoConstraints.gridx = 1;
+    convoConstraints.gridy = 0;
+    convoConstraints.gridwidth = 2;
+    convoConstraints.gridheight = 2;
+    convoPanel.add(messages, convoConstraints);
+
+    //Panel with command buttons and text input
+    JPanel convoInputPanel = new JPanel();
+    convoInputPanel.setLayout(new GridLayout(2, 1));
+    convoConstraints.gridx = 1;
+    convoConstraints.gridy = 2;
+    convoConstraints.gridwidth = 2;
+    convoConstraints.gridheight = 1;
+    convoPanel.add(convoInputPanel, convoConstraints);
+
+    //Text input for user's messages/other conversation commands
+    JTextField convoTextInput = new JTextField(1);
+    convoInputPanel.add(convoTextInput);
+    //TODO parse input and link it to the conversation panel's commands
+
+    //Command buttons
+    JPanel convoButtonPanel = new JPanel();
+    convoButtonPanel.setLayout(new GridLayout(1, 9));
+    convoInputPanel.add(convoButtonPanel);
+    JButton convoHelp = new JButton("Help");
+    convoButtonPanel.add(convoHelp);
+    JButton addMessage = new JButton("Add Message");
+    convoButtonPanel.add(addMessage);
+    JButton addMember = new JButton("Add Member");
+    convoButtonPanel.add(addMember);
+    JButton removeMember = new JButton("Remove Member");
+    convoButtonPanel.add(removeMember);
+    JButton removeOwner = new JButton("Remove Owner");
+    convoButtonPanel.add(removeOwner);
+    JButton addOwner = new JButton("Add Owner");
+    convoButtonPanel.add(addOwner);
+    JButton convoInfo = new JButton("Info");
+    convoButtonPanel.add(convoInfo);
+    JButton convoBack = new JButton("Back");
+    convoButtonPanel.add(convoBack);
+    JButton convoExit = new JButton("Exit");
+    convoButtonPanel.add(convoExit);
 
     window.pack();
     window.setVisible(true);
