@@ -126,6 +126,14 @@ final class ClientMain {
     JButton info = new JButton("Info");
     rootButtonPanel.add(info);
     JButton exit = new JButton("Exit");
+    exit.addActionListener(new ActionListener(){
+      @Override
+      public void actionPerformed(ActionEvent arg0) {
+        window.dispose();
+        System.exit(0);
+      }
+
+    });
     rootButtonPanel.add(exit);
 
 
@@ -217,6 +225,14 @@ final class ClientMain {
     });
     userButtonPanel.add(userBack);
     JButton userExit = new JButton("Exit");
+    userExit.addActionListener(new ActionListener(){
+      @Override
+      public void actionPerformed(ActionEvent arg0) {
+        window.dispose();
+        System.exit(0);
+      }
+
+    });
     userButtonPanel.add(userExit);
 
 
@@ -291,6 +307,14 @@ final class ClientMain {
     });
     convoButtonPanel.add(convoBack);
     JButton convoExit = new JButton("Exit");
+    convoExit.addActionListener(new ActionListener(){
+      @Override
+      public void actionPerformed(ActionEvent arg0) {
+        window.dispose();
+        System.exit(0);
+      }
+
+    });
     convoButtonPanel.add(convoExit);
 
     window.pack();
