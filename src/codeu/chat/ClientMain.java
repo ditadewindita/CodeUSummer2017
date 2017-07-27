@@ -15,6 +15,8 @@
 package codeu.chat;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.*;
 
 import codeu.chat.client.commandline.Chat;
@@ -49,12 +51,6 @@ final class ClientMain {
     //Overall panel that will hold all smaller panels
     JPanel backingPanel = new JPanel();
     backingPanel.setLayout(new BorderLayout(0,0));
-//	    GridBagConstraints backingConstraints = new GridBagConstraints();
-//	    backingConstraints.fill = GridBagConstraints.BOTH;
-//	    backingConstraints.gridx = 0;
-//	    backingConstraints.gridy = 0;
-//	    backingConstraints.gridwidth = 3;
-//	    backingConstraints.gridheight = 3;
     window.add(backingPanel);
     window.setContentPane(backingPanel);
 
@@ -71,7 +67,7 @@ final class ClientMain {
     GridBagConstraints rootConstraints = new GridBagConstraints();
     rootConstraints.fill = GridBagConstraints.BOTH;
     switchPanel.add(rootPanel, "rootPanel");
-    //panelSwitcher.show(switchPanel, "rootPanel");
+    panelSwitcher.show(switchPanel, "rootPanel");
 
     JPanel userList = new JPanel();
     userList.setLayout(new BoxLayout(userList, BoxLayout.Y_AXIS));
@@ -119,6 +115,13 @@ final class ClientMain {
     JButton addUser = new JButton("Add User");
     rootButtonPanel.add(addUser);
     JButton signIn = new JButton("Sign In");
+    signIn.addActionListener(new ActionListener(){
+      @Override
+      public void actionPerformed(ActionEvent arg0) {
+        panelSwitcher.show(switchPanel, "userPanel");
+      }
+
+    });
     rootButtonPanel.add(signIn);
     JButton info = new JButton("Info");
     rootButtonPanel.add(info);
@@ -132,7 +135,7 @@ final class ClientMain {
     GridBagConstraints userConstraints = new GridBagConstraints();
     userConstraints.fill = GridBagConstraints.BOTH;
     switchPanel.add(userPanel, "userPanel");
-    panelSwitcher.show(switchPanel, "userPanel");
+//	    panelSwitcher.show(switchPanel, "userPanel");
 
     JPanel convoList = new JPanel();
     convoList.setLayout(new BoxLayout(convoList, BoxLayout.Y_AXIS));
@@ -180,6 +183,13 @@ final class ClientMain {
     JButton addConvo = new JButton("Add Conversation");
     userButtonPanel.add(addConvo);
     JButton joinConvo = new JButton("Join Conversation");
+    joinConvo.addActionListener(new ActionListener(){
+      @Override
+      public void actionPerformed(ActionEvent arg0) {
+        panelSwitcher.show(switchPanel, "convoPanel");
+      }
+
+    });
     userButtonPanel.add(joinConvo);
     JButton listInterestConvos = new JButton("List Interest Conversations");
     userButtonPanel.add(listInterestConvos);
@@ -198,6 +208,13 @@ final class ClientMain {
     JButton userInfo = new JButton("Info");
     userButtonPanel.add(userInfo);
     JButton userBack = new JButton("Back");
+    userBack.addActionListener(new ActionListener(){
+      @Override
+      public void actionPerformed(ActionEvent arg0) {
+        panelSwitcher.show(switchPanel, "rootPanel");
+      }
+
+    });
     userButtonPanel.add(userBack);
     JButton userExit = new JButton("Exit");
     userButtonPanel.add(userExit);
@@ -265,6 +282,13 @@ final class ClientMain {
     JButton convoInfo = new JButton("Info");
     convoButtonPanel.add(convoInfo);
     JButton convoBack = new JButton("Back");
+    convoBack.addActionListener(new ActionListener(){
+      @Override
+      public void actionPerformed(ActionEvent arg0) {
+        panelSwitcher.show(switchPanel, "userPanel");
+      }
+
+    });
     convoButtonPanel.add(convoBack);
     JButton convoExit = new JButton("Exit");
     convoButtonPanel.add(convoExit);
