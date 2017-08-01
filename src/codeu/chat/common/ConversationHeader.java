@@ -56,7 +56,13 @@ public final class ConversationHeader {
   public final Time creation;
   public final String title;
 
+  public static final int MEMBER = 0x0001;
+  public static final int OWNER = 0x0002;
+  public static final int CREATOR = 0x0004;
+  public static final int REMOVED = 0x0008;
+
   public final HashMap<Uuid, Integer> unseenMessages;
+  public final HashMap<Uuid, Integer> accessControls;
 
   public ConversationHeader(Uuid id, Uuid owner, Time creation, String title) {
 
@@ -65,6 +71,7 @@ public final class ConversationHeader {
     this.creation = creation;
     this.title = title;
     this.unseenMessages = new HashMap<>();
+    this.accessControls = new HashMap<>();
   }
 
 }

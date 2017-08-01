@@ -78,6 +78,26 @@ public final class ConversationContext {
         getMessage(updated.lastMessage);
   }
 
+  public Integer getUserAccessControl(Uuid user){
+    return view.getUserAccessControl(this.conversation.id, user);
+  }
+
+  public Integer toggleMemberBit(Uuid user, Boolean flag){
+    return controller.toggleMemberBit(this.conversation.id, user, flag);
+  }
+
+  public Integer toggleOwnerBit(Uuid user, Boolean flag){
+    return controller.toggleOwnerBit(this.conversation.id, user, flag);
+  }
+
+  public Integer toggleCreatorBit(Uuid user, Boolean flag){
+    return controller.toggleCreatorBit(this.conversation.id, user, flag);
+  }
+
+  public Integer toggleRemovedBit(Uuid user){
+    return controller.toggleRemovedBit(this.conversation.id, user);
+  }
+
   private ConversationPayload getUpdated() {
     final Collection<Uuid> ids = Arrays.asList(conversation.id);
     final Iterator<ConversationPayload> payloads = view.getConversationPayloads(ids).iterator();

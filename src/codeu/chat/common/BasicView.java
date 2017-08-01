@@ -83,4 +83,9 @@ public interface BasicView {
   //
   //  Returns the number of messages this user hasn't seen in a specific conversation
   Integer getUnseenMessagesCount(Uuid user, Uuid convo);
+
+  // GET ACCESS CONTROL OF SPECIFIC USER
+  //
+  //  Return the access control integer of a specific user for a specific conversation
+  Integer getUserAccessControl(Uuid convo, Uuid user);
 }

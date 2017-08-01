@@ -329,6 +329,74 @@ public final class Server {
       }
     });
 
+    // Toggle User's Member Bit - A client wants to toggle the member bit of a user in a specific conversation
+    this.commands.put(NetworkCode.TOGGLE_MEMBER_BIT_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid convoId = Uuid.SERIALIZER.read(in);
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Boolean flag = Serializers.BOOLEAN.read(in);
+        final Integer access = controller.toggleMemberBit(convoId, userId, flag);
+
+        Serializers.INTEGER.write(out, NetworkCode.TOGGLE_MEMBER_BIT_RESPONSE);
+        Serializers.INTEGER.write(out, access);
+      }
+    });
+
+    // Toggle User's Owner Bit - A client wants to toggle the owner bit of a user in a specific conversation
+    this.commands.put(NetworkCode.TOGGLE_OWNER_BIT_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid convoId = Uuid.SERIALIZER.read(in);
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Boolean flag = Serializers.BOOLEAN.read(in);
+        final Integer access = controller.toggleOwnerBit(convoId, userId, flag);
+
+        Serializers.INTEGER.write(out, NetworkCode.TOGGLE_OWNER_BIT_RESPONSE);
+        Serializers.INTEGER.write(out, access);
+      }
+    });
+
+    // Toggle User's Owner Bit - A client wants to toggle the owner bit of a user in a specific conversation
+    this.commands.put(NetworkCode.TOGGLE_CREATOR_BIT_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid convoId = Uuid.SERIALIZER.read(in);
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Boolean flag = Serializers.BOOLEAN.read(in);
+        final Integer access = controller.toggleCreatorBit(convoId, userId, flag);
+
+        Serializers.INTEGER.write(out, NetworkCode.TOGGLE_CREATOR_BIT_RESPONSE);
+        Serializers.INTEGER.write(out, access);
+      }
+    });
+
+    // Toggle User's Owner Bit - A client wants to toggle the owner bit of a user in a specific conversation
+    this.commands.put(NetworkCode.TOGGLE_REMOVED_BIT_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid convoId = Uuid.SERIALIZER.read(in);
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Integer access = controller.toggleRemovedBit(convoId, userId);
+
+        Serializers.INTEGER.write(out, NetworkCode.TOGGLE_REMOVED_BIT_RESPONSE);
+        Serializers.INTEGER.write(out, access);
+      }
+    });
+
+    // Get User's Access Control - A client wants to see the access control of a user
+    this.commands.put(NetworkCode.GET_USER_ACCESS_CONTROL_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid convoId = Uuid.SERIALIZER.read(in);
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Integer access = view.getUserAccessControl(convoId, userId);
+
+        Serializers.INTEGER.write(out, NetworkCode.GET_USER_ACCESS_CONTROL_RESPONSE);
+        Serializers.INTEGER.write(out, access);
+      }
+    });
+
 
     this.timeline.scheduleNow(new Runnable() {
       @Override
@@ -425,6 +493,38 @@ public final class Server {
         Uuid follow = Uuid.parse(logInfo.next());
 
         controller.removeConversationInterest(commandUuid, follow);
+      }
+
+      // ACCESS CONTROL
+      if(commandType.equals("ADD-CONVO-CREATOR")){
+        Uuid user = Uuid.parse(logInfo.next());
+
+        controller.toggleCreatorBit(commandUuid, user, true);
+      }
+      else if(commandType.equals("ADD-CONVO-MEMBER")){
+        Uuid user = Uuid.parse(logInfo.next());
+
+        controller.toggleMemberBit(commandUuid, user, true);
+      }
+      else if(commandType.equals("REMOVE-CONVO-MEMBER")){
+        Uuid user = Uuid.parse(logInfo.next());
+
+        controller.toggleMemberBit(commandUuid, user, false);
+      }
+      else if(commandType.equals("REMOVE-CONVO-TOGGLE")){
+        Uuid user = Uuid.parse(logInfo.next());
+
+        controller.toggleRemovedBit(commandUuid, user);
+      }
+      else if(commandType.equals("ADD-CONVO-OWNER")){
+        Uuid user = Uuid.parse(logInfo.next());
+
+        controller.toggleOwnerBit(commandUuid, user, true);
+      }
+      else if(commandType.equals("REMOVE-CONVO-OWNER")){
+        Uuid user = Uuid.parse(logInfo.next());
+
+        controller.toggleOwnerBit(commandUuid, user, false);
       }
     }
 

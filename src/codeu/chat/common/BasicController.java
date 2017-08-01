@@ -104,4 +104,29 @@ public interface BasicController {
   //  If successful, the method will return the user's message count for the specified conversation.
   Integer updateUsersUnseenMessagesCount(Uuid user, Uuid convo, Integer count);
 
+  // TOGGLE MEMBER BIT
+  //
+  // Turn the member bit of a user's access control to the specified flag. If successful, the access control
+  // integer of the specific user for the conversation will return.
+  Integer toggleMemberBit(Uuid convo, Uuid user, Boolean flag);
+
+  // TOGGLE OWNER BIT
+  //
+  // Turn the owner bit of a user's access control to the specified flag. If successful, the access control
+  // integer of the specific user for the conversation will return.
+  Integer toggleOwnerBit(Uuid convo, Uuid user, Boolean flag);
+
+  // TOGGLE CREATOR BIT
+  //
+  // Turn the creator bit of a user's access control to the specified flag. If successful, the access control
+  // integer of the specific user for the conversation will return.
+  Integer toggleCreatorBit(Uuid convo, Uuid user, Boolean flag);
+
+  // TOGGLE REMOVED BIT
+  //
+  // Turn the removed bit of a user's access control on. If successful, the access control
+  // integer of the specific user for the conversation will return.
+  Integer toggleRemovedBit(Uuid convo, Uuid user);
+
+
 }

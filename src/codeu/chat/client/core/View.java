@@ -43,6 +43,28 @@ public class View implements BasicView {
   }
 
   @Override
+  public Integer getUserAccessControl(Uuid convo, Uuid user){
+    try (final Connection connection = source.connect()) {
+
+      Serializers.INTEGER.write(connection.out(), NetworkCode.GET_USER_ACCESS_CONTROL_REQUEST);
+      Uuid.SERIALIZER.write(connection.out(), convo);
+      Uuid.SERIALIZER.write(connection.out(), user);
+
+      if (Serializers.INTEGER.read(connection.in()) == NetworkCode.GET_USER_ACCESS_CONTROL_RESPONSE) {
+        return Serializers.INTEGER.read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+
+    } catch (Exception ex) {
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+
+    return 0;
+  }
+
+  @Override
   public Integer getUnseenMessagesCount(Uuid user, Uuid convo){
     try (final Connection connection = source.connect()) {
 

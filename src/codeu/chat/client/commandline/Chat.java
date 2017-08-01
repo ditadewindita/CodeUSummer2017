@@ -35,14 +35,7 @@ public final class Chat {
   private Context rootPanelContext;
   //used to access Chat's conversations from outside the user panel
   private UserContext userPanelContext;
-
-  // Map each conversation to its corresponding access control for each user
-  private HashMap<Uuid, HashMap<Uuid, Integer>> convoAccessControls = new HashMap<>();
-
-  private static final int MEMBER = 0x0001;
-  private static final int OWNER = 0x0002;
-  private static final int CREATOR = 0x0004;
-  private static final int REMOVED = 0x0008;
+  private ConversationContext conversationPanelContext;
 
   /**
    * ArrayDeque is a double-ended, self-resizing queue, used
@@ -355,7 +348,8 @@ public final class Chat {
                     conversation.conversation.creation.inMs()
             ));
 
-            toggleUserToCreator(conversation.conversation.id, user.user.id, true);
+            conversation.toggleCreatorBit(user.user.id, true);
+
             transactionLog.add(String.format("ADD-CONVO-CREATOR %s %s",
                     conversation.conversation.id,
                     user.user.id
@@ -385,14 +379,13 @@ public final class Chat {
             //if the user has been removed from the conversation before they can't join on their own
             else if (!hasBeenRemoved(conversation.conversation.id, user.user.id)) {
               panels.push(createConversationPanel(conversation));
-              toggleUserToMember(conversation.conversation.id, user.user.id, true);
+              conversation.toggleMemberBit(user.user.id, true);
             } else {
-                System.out.println("ERROR: Missing <title>");
+              System.out.println("ERROR: You have been removed from this conversation and can't rejoin.\n" +
+                      "You must be added to the conversation by an owner or creator to rejoin.");
             }
-        }
-        else {
-            System.out.println("ERROR: You have been removed from this conversation and can't rejoin.\n" +
-                    "You must be added to the conversation by an owner or creator to rejoin.");
+        } else {
+          System.out.println("ERROR: Missing <title>");
         }
       }
 
@@ -680,6 +673,7 @@ public final class Chat {
   private Panel createConversationPanel(final ConversationContext conversation) {
 
     final Panel panel = new Panel();
+    conversationPanelContext = conversation;
 
     // HELP
     //
@@ -781,11 +775,11 @@ public final class Chat {
       panel.register("u-member-list", new Panel.Command() {
         @Override
         public void invoke(List<String> args) {
-          HashMap<Uuid, Integer> controls = getConversationAccessControl(conversation.conversation.id);
-          for(Uuid u : controls.keySet()){
-            UserContext user = findUser(u);
-            if(isMember(conversation.conversation.id, user.user.id))
+          for(Uuid u : rootPanelContext.allUsers().keySet()){
+            if(isMember(conversation.conversation.id, u)) {
+              UserContext user = findUser(u);
               System.out.format("Name: %s  (UUID: %s)\n", user.user.name, user.user.id);
+            }
           }
         }
       });
@@ -811,7 +805,7 @@ public final class Chat {
                           System.out.format("ERROR: User '%s' is an owner or creator.\n", name);
                       }
                       else {
-                          toggleUserToMember(conversation.conversation.id, removeUser.user.id, true);
+                          conversation.toggleMemberBit(removeUser.user.id, true);
 
                           transactionLog.add(String.format("ADD-CONVO-MEMBER %s %s",
                                   conversation.conversation.id,
@@ -823,7 +817,7 @@ public final class Chat {
                   }
               }
               else {
-                  System.out.println("ERROR: Only users with owner or creator status\n can add members to a conversation.");
+                  System.out.println("ERROR: Only users with owner or creator status can add members to a conversation.");
               }
           }
       });
@@ -847,7 +841,7 @@ public final class Chat {
               System.out.format("ERROR: User '%s' is an owner or creator.\n", name);
             }
             else {
-              toggleUserToMember(conversation.conversation.id, removeUser.user.id, false);
+              conversation.toggleMemberBit(removeUser.user.id, false);
 
               transactionLog.add(String.format("REMOVE-CONVO-MEMBER %s %s",
                       conversation.conversation.id,
@@ -856,7 +850,7 @@ public final class Chat {
 
               //the removed flag should only be toggled once, when the user is first removed
               if (!hasBeenRemoved(conversation.conversation.id, removeUser.user.id)) {
-                toggleRemoved(conversation.conversation.id, removeUser.user.id);
+                conversation.toggleRemovedBit(removeUser.user.id);
 
                 transactionLog.add(String.format("REMOVE-CONVO-MEMBER-TOGGLE %s %s",
                         conversation.conversation.id,
@@ -881,11 +875,11 @@ public final class Chat {
     panel.register("u-owner-list", new Panel.Command() {
       @Override
       public void invoke(List<String> args) {
-        HashMap<Uuid, Integer> controls = getConversationAccessControl(conversation.conversation.id);
-        for(Uuid u : controls.keySet()){
-          UserContext user = findUser(u);
-          if(isOwner(conversation.conversation.id, user.user.id))
+        for(Uuid u : rootPanelContext.allUsers().keySet()){
+          if(isOwner(conversation.conversation.id, u)) {
+            UserContext user = findUser(u);
             System.out.format("Name: %s  (UUID: %s)\n", user.user.name, user.user.id);
+          }
         }
       }
     });
@@ -906,7 +900,7 @@ public final class Chat {
             if (removedOwner == null) {
               System.out.format("ERROR: User '%s' does not exist.\n", name);
             } else {
-              toggleUserToOwner(conversation.conversation.id, removedOwner.user.id, false);
+              conversation.toggleOwnerBit(removedOwner.user.id, false);
 
               transactionLog.add(String.format("REMOVE-CONVO-OWNER %s %s",
                       conversation.conversation.id,
@@ -939,7 +933,7 @@ public final class Chat {
             if (addedOwner == null) {
               System.out.format("ERROR: User '%s' does not exist.\n", name);
             } else {
-              toggleUserToOwner(conversation.conversation.id, addedOwner.user.id, true);
+              conversation.toggleOwnerBit(addedOwner.user.id, true);
 
               transactionLog.add(String.format("ADD-CONVO-OWNER %s %s",
                       conversation.conversation.id,
@@ -1026,95 +1020,28 @@ public final class Chat {
     return userPanelContext.conversations().get(id);
    }
 
-  public HashMap<Uuid, Integer> getConversationAccessControl(Uuid convo){
-    return convoAccessControls.computeIfAbsent(convo, controls -> new HashMap<>());
-  }
-
-  // Flag is set to true if user is to be set to new status, else it's bit is 'turned off'
-  public void toggleUserToMember(Uuid c, Uuid u, boolean flag){
-    HashMap<Uuid, Integer> controls = getConversationAccessControl(c);
-    Integer access = controls.computeIfAbsent(u, newAccess -> 0);
-    Integer newAccess;
-
-    if(flag)
-      newAccess = access | MEMBER;
-      // If member bit is to be 'turned off', also turn off it's parent controls
-    else {
-      newAccess = access & ~MEMBER;
-      newAccess &= ~OWNER;
-      newAccess &= ~CREATOR;
-    }
-    controls.put(u, newAccess);
-    convoAccessControls.put(c, controls);
-  }
-
-  public void toggleUserToOwner(Uuid c, Uuid u, boolean flag){
-    HashMap<Uuid, Integer> controls = getConversationAccessControl(c);
-    Integer access = controls.computeIfAbsent(u, newAccess -> 0);
-    Integer newAccess;
-
-    // If user is to be set as an Owner, it will also be it's children controls
-    if(flag){
-      newAccess = access | OWNER;
-      newAccess |= MEMBER;
-    }
-    // If user is not an Owner anymore, it is also not it's parent controls anymore
-    else {
-      newAccess = access & ~OWNER;
-      newAccess &= ~CREATOR;
-    }
-    controls.put(u, newAccess);
-    convoAccessControls.put(c, controls);
-  }
-
-  public void toggleUserToCreator(Uuid c, Uuid u, boolean flag){
-    HashMap<Uuid, Integer> controls = getConversationAccessControl(c);
-    Integer access = controls.computeIfAbsent(u, newAccess -> 0);
-    Integer newAccess;
-
-    // If user is to be set as a Creator, it will also be it's children controls
-    if(flag) {
-      newAccess = access | CREATOR;
-      newAccess |= OWNER;
-      newAccess |= MEMBER;
-    }
-    else
-      newAccess = access & ~CREATOR;
-
-    controls.put(u, newAccess);
-    convoAccessControls.put(c, controls);
-  }
-
-  // Flag is set to true if the user is removed from a conversation.
-  // Flag stays true once it's set.
-  public void toggleRemoved(Uuid c, Uuid u){
-    HashMap<Uuid, Integer> controls = getConversationAccessControl(c);
-    Integer access = controls.computeIfAbsent(u, newAccess -> 0);
-    Integer newAccess;
-
-    newAccess = access | REMOVED;
-
-    controls.put(u, newAccess);
-    convoAccessControls.put(c, controls);
-  }
 
   public boolean isMember(Uuid c, Uuid u){
-    HashMap<Uuid, Integer> controls = getConversationAccessControl(c);
-    return controls.get(u) != null && (controls.get(u) & MEMBER) != 0;
+    ConversationContext conversation = findConversation(c);
+    Integer access = conversation.getUserAccessControl(u);
+    return access != null && (access & ConversationHeader.MEMBER) != 0;
   }
 
   public boolean isOwner(Uuid c, Uuid u){
-    HashMap<Uuid, Integer> controls = getConversationAccessControl(c);
-    return controls.get(u) != null && (controls.get(u) & OWNER) != 0;
+    ConversationContext conversation = findConversation(c);
+    Integer access = conversation.getUserAccessControl(u);
+    return access != null && (access & ConversationHeader.OWNER) != 0;
   }
 
   public boolean isCreator(Uuid c, Uuid u){
-    HashMap<Uuid, Integer> controls = getConversationAccessControl(c);
-    return controls.get(u) != null && (controls.get(u) & CREATOR) != 0;
+    ConversationContext conversation = findConversation(c);
+    Integer access = conversation.getUserAccessControl(u);
+    return access != null && (access & ConversationHeader.CREATOR) != 0;
   }
 
   public boolean hasBeenRemoved(Uuid c, Uuid u){
-    HashMap<Uuid, Integer> controls = getConversationAccessControl(c);
-    return controls.get(u) != null && (controls.get(u) & REMOVED) != 0;
+    ConversationContext conversation = findConversation(c);
+    Integer access = conversation.getUserAccessControl(u);
+    return access != null && (access & ConversationHeader.REMOVED) != 0;
   }
 }

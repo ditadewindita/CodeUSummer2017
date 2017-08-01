@@ -15,6 +15,7 @@
 package codeu.chat.server;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -58,15 +59,168 @@ public final class Controller implements RawController, BasicController {
   }
 
   @Override
+  public Integer toggleRemovedBit(Uuid convo, Uuid user){
+    final ConversationHeader foundConvo = model.conversationById().first(convo);
+    final User foundUser = model.userById().first(user);
+
+    Integer result = 0;
+
+    if(foundConvo != null && foundUser != null) {
+      Integer access = foundConvo.accessControls.computeIfAbsent(user, newAccess -> 0);
+      Integer newAccess;
+
+      // Flag is set to true if the user is removed from a conversation.
+      // Flag stays true once it's set.
+      newAccess = access | ConversationHeader.REMOVED;
+
+      result = newAccess;
+      foundConvo.accessControls.put(user, newAccess);
+
+      LOG.info(
+              "toggleRemovedBit success (user.id=%s conversation.id=%s access=%s)",
+              foundUser.id,
+              foundConvo.id,
+              newAccess);
+    } else {
+      LOG.info(
+              "toggleRemovedBit fail (user.id=%s conversation.id=%s)",
+              foundUser.id,
+              foundConvo.id);
+    }
+
+    return result;
+  }
+
+  @Override
+  public Integer toggleCreatorBit(Uuid convo, Uuid user, Boolean flag){
+    final ConversationHeader foundConvo = model.conversationById().first(convo);
+    final User foundUser = model.userById().first(user);
+
+    Integer result = 0;
+
+    if(foundConvo != null && foundUser != null) {
+      Integer access = foundConvo.accessControls.computeIfAbsent(user, newAccess -> 0);
+      Integer newAccess;
+
+      // If user is to be set as a Creator, it will also be it's children controls
+      if(flag) {
+        newAccess = access | ConversationHeader.CREATOR;
+        newAccess |= ConversationHeader.OWNER;
+        newAccess |= ConversationHeader.MEMBER;
+      }
+      else
+        newAccess = access & ~ConversationHeader.CREATOR;
+
+      result = newAccess;
+      foundConvo.accessControls.put(user, newAccess);
+
+      LOG.info(
+              "toggleCreatorBit success (user.id=%s conversation.id=%s access=%s)",
+              foundUser.id,
+              foundConvo.id,
+              newAccess);
+    } else {
+      LOG.info(
+              "toggleCreatorBit fail (user.id=%s conversation.id=%s)",
+              foundUser.id,
+              foundConvo.id);
+    }
+
+    return result;
+  }
+
+  @Override
+  public Integer toggleOwnerBit(Uuid convo, Uuid user, Boolean flag){
+    final ConversationHeader foundConvo = model.conversationById().first(convo);
+    final User foundUser = model.userById().first(user);
+
+    Integer result = 0;
+
+    if(foundConvo != null && foundUser != null) {
+      Integer access = foundConvo.accessControls.computeIfAbsent(user, newAccess -> 0);
+      Integer newAccess;
+
+      // If user is to be set as an Owner, it will also be it's children controls
+      if(flag){
+        newAccess = access | ConversationHeader.OWNER;
+        newAccess |= ConversationHeader.MEMBER;
+      }
+      // If user is not an Owner anymore, it is also not it's parent controls anymore
+      else {
+        newAccess = access & ~ConversationHeader.OWNER;
+        newAccess &= ~ConversationHeader.CREATOR;
+      }
+
+      result = newAccess;
+      foundConvo.accessControls.put(user, newAccess);
+
+      LOG.info(
+              "toggleOwnerBit success (user.id=%s conversation.id=%s access=%s)",
+              foundUser.id,
+              foundConvo.id,
+              newAccess);
+    } else {
+      LOG.info(
+              "toggleOwnerBit fail (user.id=%s conversation.id=%s)",
+              foundUser.id,
+              foundConvo.id);
+    }
+
+    return result;
+  }
+
+  @Override
+  public Integer toggleMemberBit(Uuid convo, Uuid user, Boolean flag){
+    final ConversationHeader foundConvo = model.conversationById().first(convo);
+    final User foundUser = model.userById().first(user);
+
+    Integer result = 0;
+
+    if(foundConvo != null && foundUser != null) {
+      Integer access = foundConvo.accessControls.computeIfAbsent(user, newAccess -> 0);
+      Integer newAccess;
+
+      if(flag)
+        newAccess = access | ConversationHeader.MEMBER;
+        // If member bit is to be 'turned off', also turn off it's parent controls
+      else {
+        newAccess = access & ~ConversationHeader.MEMBER;
+        newAccess &= ~ConversationHeader.OWNER;
+        newAccess &= ~ConversationHeader.CREATOR;
+      }
+
+      result = newAccess;
+      foundConvo.accessControls.put(user, newAccess);
+
+      LOG.info(
+              "toggleMemberBit success (user.id=%s conversation.id=%s access=%s)",
+              foundUser.id,
+              foundConvo.id,
+              newAccess);
+    } else {
+      LOG.info(
+              "toggleMemberBit fail (user.id=%s conversation.id=%s)",
+              foundUser.id,
+              foundConvo.id);
+    }
+
+    return result;
+  }
+
+  @Override
   public Integer updateUsersUnseenMessagesCount(Uuid user, Uuid convo, Integer count){
     final User foundUser = model.userById().first(user);
     final ConversationHeader foundConvo = model.conversationById().first(convo);
+
+    Integer result = 0;
 
     if(foundUser != null && foundConvo != null){
       Integer currentCount = (foundConvo.unseenMessages.get(foundUser) == null) ? 0 : foundConvo.unseenMessages.get(foundUser);
       Integer setCount = (currentCount + count < 0) ? 0 : currentCount + count;
 
       foundConvo.unseenMessages.put(foundUser.id, setCount);
+
+      result = foundConvo.unseenMessages.get(foundUser.id);
 
       LOG.info(
               "updateUsersUnseenMessagesCount success (user.id=%s conversation.id=%s count=%s)",
@@ -80,15 +234,18 @@ public final class Controller implements RawController, BasicController {
               foundConvo.id);
     }
 
-    return foundConvo.unseenMessages.get(foundUser.id);
+    return result;
   }
 
   @Override
   public Time updateUsersLastStatusUpdate(Uuid user, Time time){
     final User foundUser = model.userById().first(user);
 
+    Time update = null;
+
     if(foundUser != null && time.inMs() > foundUser.creation.inMs()){
       foundUser.lastStatusUpdate = time;
+      update = foundUser.lastStatusUpdate;
 
       LOG.info(
               "updateUsersLastStatusUpdate success (user.id=%s time=%s)",
@@ -102,7 +259,7 @@ public final class Controller implements RawController, BasicController {
               time.inMs());
     }
 
-    return foundUser.lastStatusUpdate;
+    return update;
   }
 
   @Override
@@ -110,8 +267,11 @@ public final class Controller implements RawController, BasicController {
     final User foundUser = model.userById().first(user);
     final ConversationHeader foundConversation = model.conversationById().first(convo);
 
+    Map<Uuid, Time> map = null;
+
     if(foundUser != null && foundConversation != null){
       foundUser.updatedConversations.put(foundConversation.id, time);
+      map = foundUser.updatedConversations;
 
       LOG.info(
               "newUpdatedConversation success (user.id=%s conversation.id=%s time=%s)",
@@ -126,7 +286,7 @@ public final class Controller implements RawController, BasicController {
               time.inMs());
     }
 
-    return foundUser.updatedConversations;
+    return map;
   }
 
   @Override

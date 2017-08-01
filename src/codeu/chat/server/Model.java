@@ -66,6 +66,7 @@ public final class Model {
   private final Store<String, ConversationHeader> conversationByText = new Store<>(STRING_COMPARE);
 
   private final Store<Uuid, HashMap<Uuid, Integer>> conversationByUnseenMessages = new Store<>(UUID_COMPARE);
+  private final Store<Uuid, HashMap<Uuid, Integer>> conversationByAccessControl = new Store<>(UUID_COMPARE);
 
   private final Store<Uuid, ConversationPayload> conversationPayloadById = new Store<>(UUID_COMPARE);
 
@@ -111,6 +112,8 @@ public final class Model {
     conversationPayloadById.insert(conversation.id, new ConversationPayload(conversation.id));
 
     conversationByUnseenMessages.insert(conversation.id, conversation.unseenMessages);
+    conversationByAccessControl.insert(conversation.id, conversation.accessControls);
+
   }
 
   public StoreAccessor<Uuid, ConversationHeader> conversationById() {
@@ -130,6 +133,8 @@ public final class Model {
   }
 
   public StoreAccessor<Uuid, HashMap<Uuid, Integer>> conversationByUnseenMessages() { return conversationByUnseenMessages; }
+
+  public StoreAccessor<Uuid, HashMap<Uuid, Integer>> conversationByAccessControl() { return conversationByAccessControl; }
 
   public void add(Message message) {
     messageById.insert(message.id, message);

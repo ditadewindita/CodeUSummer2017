@@ -31,64 +31,6 @@ final class ClientMain {
 
   private static Chat chat;
 
-  private static void reloadOldInterests() throws IOException {
-    // Open the transaction log file for reading
-    BufferedReader bufferedReader = new BufferedReader(new FileReader("data/transaction_log.txt"));
-
-    // Read the header lines of each transaction log
-    String line;
-
-    while((line = bufferedReader.readLine()) != null) {
-
-      // Instantiate a Tokenizer to parse through log's data
-      Tokenizer logInfo = new Tokenizer(line);
-
-      String commandType = logInfo.next();
-
-      // ACCESS CONTROL
-      if(commandType.equals("ADD-CONVO-CREATOR")){
-        Uuid convo = Uuid.parse(logInfo.next());
-        Uuid user = Uuid.parse(logInfo.next());
-
-        chat.toggleUserToCreator(convo, user, true);
-      }
-      else if(commandType.equals("ADD-CONVO-MEMBER")){
-        Uuid convo = Uuid.parse(logInfo.next());
-        Uuid user = Uuid.parse(logInfo.next());
-
-        chat.toggleUserToMember(convo, user, true);
-      }
-      else if(commandType.equals("REMOVE-CONVO-MEMBER")){
-        Uuid convo = Uuid.parse(logInfo.next());
-        Uuid user = Uuid.parse(logInfo.next());
-
-        chat.toggleUserToMember(convo, user, false);
-      }
-      else if(commandType.equals("REMOVE-CONVO-TOGGLE")){
-        Uuid convo = Uuid.parse(logInfo.next());
-        Uuid user = Uuid.parse(logInfo.next());
-
-        chat.toggleRemoved(convo, user);
-      }
-      else if(commandType.equals("ADD-CONVO-OWNER")){
-        Uuid convo = Uuid.parse(logInfo.next());
-        Uuid user = Uuid.parse(logInfo.next());
-
-        chat.toggleUserToOwner(convo, user, true);
-      }
-      else if(commandType.equals("REMOVE-CONVO-OWNER")){
-        Uuid convo = Uuid.parse(logInfo.next());
-        Uuid user = Uuid.parse(logInfo.next());
-
-        chat.toggleUserToOwner(convo, user, false);
-      }
-    }
-
-    LOG.info("Successfully restored last logged interest system state.");
-
-    bufferedReader.close();
-  }
-
   public static void main(String [] args) {
 
     try {
@@ -110,13 +52,6 @@ final class ClientMain {
     chat = new Chat(new Context(source));
 
     LOG.info("Created client");
-
-    // Reload old interests
-    try {
-      reloadOldInterests();
-    } catch (Exception e) {
-      LOG.info("Could not reload last logged interest system.");
-    }
 
     boolean keepRunning = true;
 

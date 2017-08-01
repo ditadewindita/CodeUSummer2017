@@ -53,6 +53,12 @@ public final class View implements BasicView, SinglesView {
   }
 
   @Override
+  public Integer getUserAccessControl(Uuid convo, Uuid user){
+    Integer access = model.conversationByAccessControl().first(convo).computeIfAbsent(user, newAccess -> 0);
+    return access;
+  }
+
+  @Override
   public Integer getUnseenMessagesCount(Uuid user, Uuid convo){
     return model.conversationByUnseenMessages().first(convo).get(user);
   }
