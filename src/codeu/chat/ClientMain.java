@@ -40,9 +40,6 @@ final class ClientMain {
 
     System.out.println("Loading interest system...");
 
-    //Application GUI
-    GUI.launchGUI();
-
     while((line = bufferedReader.readLine()) != null) {
 
       // Instantiate a Tokenizer to parse through log's data
@@ -102,6 +99,9 @@ final class ClientMain {
     LOG.info("Creating client...");
 
     chat = new Chat(new Context(source));
+
+    //Application GUI
+    GUI.launchGUI(chat);
 
     LOG.info("Created client");
 

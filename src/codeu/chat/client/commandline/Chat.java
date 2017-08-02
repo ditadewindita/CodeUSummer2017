@@ -116,6 +116,7 @@ public final class Chat {
     // panel.
 
     if ("exit".equals(command)) {
+      System.out.println("exit button was pushed and triggered exit command!");
       // The user does not want to process any more commands
       transferQueueToLog();
 

@@ -1,5 +1,7 @@
 package codeu.chat.util;
 
+import codeu.chat.client.commandline.Chat;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -10,7 +12,7 @@ import java.awt.event.ActionListener;
  */
 public class GUI {
 
-    public static void launchGUI(){
+    public static void launchGUI(Chat chat){
         JFrame window = new JFrame("CodeU Chat App");
         window.setSize(700, 700);
 
@@ -92,14 +94,15 @@ public class GUI {
         JButton info = new JButton("Info");
         rootButtonPanel.add(info);
         JButton exit = new JButton("Exit");
-        exit.addActionListener(new ActionListener(){
+        ActionListener exitListener = new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent arg0) {
+                chat.handleCommand("exit");
                 window.dispose();
                 System.exit(0);
             }
-
-        });
+        };
+        exit.addActionListener(exitListener);
         rootButtonPanel.add(exit);
 
 
@@ -124,7 +127,7 @@ public class GUI {
         userPanel.add(convoList, userConstraints);
 
         //message/text display window in user panel, should not display any messages in user panel
-        JTextArea userTextDisplay = new JTextArea("Chat Messages", 20, 20);
+        JTextArea userTextDisplay = new JTextArea("Chat Messages\nType in input text box and press a command button.", 20, 20);
         userTextDisplay.setLayout(new FlowLayout());
         userConstraints.gridx = 1;
         userConstraints.gridy = 0;
@@ -151,12 +154,19 @@ public class GUI {
         userButtonPanel.setLayout(new GridLayout(2, 7));
         userInputPanel.add(userButtonPanel);
         JButton userHelp = new JButton("Help");
+        userHelp.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                chat.handleCommand("help");
+            }
+
+        });
         userButtonPanel.add(userHelp);
-        JButton listConvos = new JButton("List Conversations");
+        JButton listConvos = new JButton("List Chats");
         userButtonPanel.add(listConvos);
-        JButton addConvo = new JButton("Add Conversation");
+        JButton addConvo = new JButton("Add Chat");
         userButtonPanel.add(addConvo);
-        JButton joinConvo = new JButton("Join Conversation");
+        JButton joinConvo = new JButton("Join Chat");
         joinConvo.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -165,11 +175,11 @@ public class GUI {
 
         });
         userButtonPanel.add(joinConvo);
-        JButton listInterestConvos = new JButton("List Interest Conversations");
+        JButton listInterestConvos = new JButton("List Interest Chats");
         userButtonPanel.add(listInterestConvos);
-        JButton addInterestConvo = new JButton("Add Interest Conversation");
+        JButton addInterestConvo = new JButton("Add Interest Chat");
         userButtonPanel.add(addInterestConvo);
-        JButton removeInterestConvo = new JButton("Remove Interest Conversation");
+        JButton removeInterestConvo = new JButton("Remove Interest Chat");
         userButtonPanel.add(removeInterestConvo);
         JButton listInterestUsers = new JButton("List Interest Users");
         userButtonPanel.add(listInterestUsers);
@@ -191,14 +201,7 @@ public class GUI {
         });
         userButtonPanel.add(userBack);
         JButton userExit = new JButton("Exit");
-        userExit.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                window.dispose();
-                System.exit(0);
-            }
-
-        });
+        userExit.addActionListener(exitListener);
         userButtonPanel.add(userExit);
 
 
@@ -273,14 +276,7 @@ public class GUI {
         });
         convoButtonPanel.add(convoBack);
         JButton convoExit = new JButton("Exit");
-        convoExit.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                window.dispose();
-                System.exit(0);
-            }
-
-        });
+        convoExit.addActionListener(exitListener);
         convoButtonPanel.add(convoExit);
 
         window.pack();
