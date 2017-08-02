@@ -12,13 +12,13 @@ import java.awt.event.ActionListener;
  */
 public class GUI {
 
-    public static void launchGUI(Chat chat){
+    public static void launchGUI(Chat chat) {
         JFrame window = new JFrame("CodeU Chat App");
         window.setSize(700, 700);
 
         //Overall panel that will hold all smaller panels
         JPanel backingPanel = new JPanel();
-        backingPanel.setLayout(new BorderLayout(0,0));
+        backingPanel.setLayout(new BorderLayout(0, 0));
         window.add(backingPanel);
         window.setContentPane(backingPanel);
 
@@ -79,22 +79,41 @@ public class GUI {
         JButton rootHelp = new JButton("Help");
         rootButtonPanel.add(rootHelp);
         JButton listUsers = new JButton("List Users");
+        listUsers.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chat.handleCommand("u-list");
+            }
+        });
         rootButtonPanel.add(listUsers);
         JButton addUser = new JButton("Add User");
+        addUser.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chat.handleCommand("u-add " + rootTextInput.getText());
+            }
+        });
         rootButtonPanel.add(addUser);
         JButton signIn = new JButton("Sign In");
-        signIn.addActionListener(new ActionListener(){
+        signIn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
+                chat.handleCommand("u-sign-in " + rootTextInput.getText());
                 panelSwitcher.show(switchPanel, "userPanel");
             }
 
         });
         rootButtonPanel.add(signIn);
         JButton info = new JButton("Info");
+        info.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chat.handleCommand("info");
+            }
+        });
         rootButtonPanel.add(info);
         JButton exit = new JButton("Exit");
-        ActionListener exitListener = new ActionListener(){
+        ActionListener exitListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 chat.handleCommand("exit");
@@ -154,7 +173,7 @@ public class GUI {
         userButtonPanel.setLayout(new GridLayout(2, 7));
         userInputPanel.add(userButtonPanel);
         JButton userHelp = new JButton("Help");
-        userHelp.addActionListener(new ActionListener(){
+        userHelp.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 chat.handleCommand("help");
@@ -163,38 +182,101 @@ public class GUI {
         });
         userButtonPanel.add(userHelp);
         JButton listConvos = new JButton("List Chats");
+        listConvos.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chat.handleCommand("c-list");
+            }
+        });
         userButtonPanel.add(listConvos);
         JButton addConvo = new JButton("Add Chat");
+        addConvo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chat.handleCommand("c-add " + userTextInput.getText());
+                panelSwitcher.show(switchPanel, "convoPanel");
+            }
+        });
         userButtonPanel.add(addConvo);
         JButton joinConvo = new JButton("Join Chat");
-        joinConvo.addActionListener(new ActionListener(){
+        joinConvo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
+                chat.handleCommand("c-join " + userTextInput.getText());
                 panelSwitcher.show(switchPanel, "convoPanel");
             }
 
         });
         userButtonPanel.add(joinConvo);
         JButton listInterestConvos = new JButton("List Interest Chats");
+        listInterestConvos.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chat.handleCommand("c-interest-list");
+            }
+        });
         userButtonPanel.add(listInterestConvos);
         JButton addInterestConvo = new JButton("Add Interest Chat");
+        addInterestConvo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chat.handleCommand("c-interest-add " + userTextInput.getText());
+            }
+        });
         userButtonPanel.add(addInterestConvo);
         JButton removeInterestConvo = new JButton("Remove Interest Chat");
+        removeInterestConvo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chat.handleCommand("c-interest-remove " + userTextInput.getText());
+            }
+        });
         userButtonPanel.add(removeInterestConvo);
         JButton listInterestUsers = new JButton("List Interest Users");
+        listInterestUsers.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chat.handleCommand("u-interest-list");
+            }
+        });
         userButtonPanel.add(listInterestUsers);
         JButton addInterestUser = new JButton("Add Interest User");
+        addInterestUser.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chat.handleCommand("u-interest-add " + userTextInput.getText());
+            }
+        });
         userButtonPanel.add(addInterestUser);
         JButton removeInterestUser = new JButton("Remove Interest User");
+        removeInterestUser.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chat.handleCommand("u-interest-remove " + userTextInput.getText());
+            }
+        });
         userButtonPanel.add(removeInterestUser);
         JButton statusUpdate = new JButton("Status Update");
         userButtonPanel.add(statusUpdate);
+        statusUpdate.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chat.handleCommand("status-update");
+            }
+        });
         JButton userInfo = new JButton("Info");
+        userInfo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chat.handleCommand("info");
+            }
+        });
         userButtonPanel.add(userInfo);
         JButton userBack = new JButton("Back");
-        userBack.addActionListener(new ActionListener(){
+        userBack.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
+                chat.handleCommand("back");
                 panelSwitcher.show(switchPanel, "rootPanel");
             }
 
@@ -253,23 +335,66 @@ public class GUI {
         convoButtonPanel.setLayout(new GridLayout(1, 9));
         convoInputPanel.add(convoButtonPanel);
         JButton convoHelp = new JButton("Help");
+        convoHelp.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chat.handleCommand("help");
+            }
+        });
         convoButtonPanel.add(convoHelp);
         JButton addMessage = new JButton("Add Message");
+        addMessage.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chat.handleCommand("m-add " + convoTextInput.getText());
+            }
+        });
         convoButtonPanel.add(addMessage);
         JButton addMember = new JButton("Add Member");
+        addMember.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chat.handleCommand("u-add-member " + convoTextInput.getText());
+            }
+        });
         convoButtonPanel.add(addMember);
         JButton removeMember = new JButton("Remove Member");
+        removeMember.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chat.handleCommand("u-remove-member " + convoTextInput.getText());
+            }
+        });
         convoButtonPanel.add(removeMember);
         JButton removeOwner = new JButton("Remove Owner");
+        removeOwner.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chat.handleCommand("u-remove-owner " + convoTextInput.getText());
+            }
+        });
         convoButtonPanel.add(removeOwner);
         JButton addOwner = new JButton("Add Owner");
+        addOwner.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chat.handleCommand("u-add-owner " + convoTextInput.getText());
+            }
+        });
         convoButtonPanel.add(addOwner);
         JButton convoInfo = new JButton("Info");
+        convoInfo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chat.handleCommand("info");
+            }
+        });
         convoButtonPanel.add(convoInfo);
         JButton convoBack = new JButton("Back");
-        convoBack.addActionListener(new ActionListener(){
+        convoBack.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
+                chat.handleCommand("back");
                 panelSwitcher.show(switchPanel, "userPanel");
             }
 

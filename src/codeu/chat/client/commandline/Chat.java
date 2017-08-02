@@ -212,6 +212,7 @@ public final class Chat {
           if (user == null) {
             System.out.println("ERROR: Failed to create new user");
           } else {
+            System.out.println("User Added!");
             transactionLog.add(String.format("ADD-USER %s \"%s\" %s",
                     user.user.id,
                     user.user.name,
@@ -379,22 +380,20 @@ public final class Chat {
       public void invoke(List<String> args) {
         final String name = args.size() > 0 ? String.join(" ", args) : "";
         if (name.length() > 0) {
-            final ConversationContext conversation = find(name);
-            //if the user has been removed from the conversation before they can't join on their own
-            if (!conversation.conversation.hasBeenRemoved(user.user)) {
-                if (conversation == null) {
-                    System.out.format("ERROR: No conversation with name '%s'\n", name);
-                } else {
-                    panels.push(createConversationPanel(conversation));
-                    conversation.conversation.toggleUserToMember(user.user, true);
-                }
-            } else {
-                System.out.println("ERROR: Missing <title>");
-            }
-        }
-        else {
+          final ConversationContext conversation = find(name);
+          if (conversation == null) {
+            System.out.format("ERROR: No conversation with name '%s'\n", name);
+          }
+          //if the user has been removed from the conversation before they can't join on their own
+          if (!conversation.conversation.hasBeenRemoved(user.user)) {
+            panels.push(createConversationPanel(conversation));
+            conversation.conversation.toggleUserToMember(user.user, true);
+          } else {
             System.out.println("ERROR: You have been removed from this conversation and can't rejoin.\n" +
                     "You must be added to the conversation by an owner or creator to rejoin.");
+          }
+        } else {
+          System.out.println("ERROR: Missing <title>");
         }
       }
 
