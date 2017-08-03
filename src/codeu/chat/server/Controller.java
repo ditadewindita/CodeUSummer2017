@@ -66,14 +66,12 @@ public final class Controller implements RawController, BasicController {
     Integer result = 0;
 
     if(foundConvo != null && foundUser != null) {
-      Integer access = foundConvo.accessControls.computeIfAbsent(user, newAccess -> 0);
-      Integer newAccess;
-
+      Integer access = foundConvo.accessControls.getOrDefault(user, 0);
       // Flag is set to true if the user is removed from a conversation.
       // Flag stays true once it's set.
-      newAccess = access | ConversationHeader.REMOVED;
-
+      Integer newAccess = access | ConversationHeader.REMOVED;
       result = newAccess;
+
       foundConvo.accessControls.put(user, newAccess);
 
       LOG.info(
@@ -99,7 +97,7 @@ public final class Controller implements RawController, BasicController {
     Integer result = 0;
 
     if(foundConvo != null && foundUser != null) {
-      Integer access = foundConvo.accessControls.computeIfAbsent(user, newAccess -> 0);
+      Integer access = foundConvo.accessControls.getOrDefault(user, 0);
       Integer newAccess;
 
       // If user is to be set as a Creator, it will also be it's children controls
@@ -137,7 +135,7 @@ public final class Controller implements RawController, BasicController {
     Integer result = 0;
 
     if(foundConvo != null && foundUser != null) {
-      Integer access = foundConvo.accessControls.computeIfAbsent(user, newAccess -> 0);
+      Integer access = foundConvo.accessControls.getOrDefault(user, 0);
       Integer newAccess;
 
       // If user is to be set as an Owner, it will also be it's children controls
@@ -177,7 +175,7 @@ public final class Controller implements RawController, BasicController {
     Integer result = 0;
 
     if(foundConvo != null && foundUser != null) {
-      Integer access = foundConvo.accessControls.computeIfAbsent(user, newAccess -> 0);
+      Integer access = foundConvo.accessControls.getOrDefault(user, 0);
       Integer newAccess;
 
       if(flag)
@@ -215,8 +213,8 @@ public final class Controller implements RawController, BasicController {
     Integer result = 0;
 
     if(foundUser != null && foundConvo != null){
-      Integer currentCount = (foundConvo.unseenMessages.get(foundUser) == null) ? 0 : foundConvo.unseenMessages.get(foundUser);
-      Integer setCount = (currentCount + count < 0) ? 0 : currentCount + count;
+      Integer currentCount = foundConvo.unseenMessages.getOrDefault(foundUser, 0);
+      Integer setCount = Math.max(0, currentCount + count);
 
       foundConvo.unseenMessages.put(foundUser.id, setCount);
 
@@ -294,8 +292,11 @@ public final class Controller implements RawController, BasicController {
     final User foundUser = model.userById().first(user1);
     final User followedUser = model.userById().first(user2);
 
+    Collection<Uuid> interests = null;
+
     if(foundUser != null && followedUser != null) {
       foundUser.userInterests.add(followedUser.id);
+      interests = foundUser.userInterests;
 
       LOG.info(
               "newUserInterest success (user.id=%s user.id=%s)",
@@ -308,7 +309,7 @@ public final class Controller implements RawController, BasicController {
               followedUser.id);
     }
 
-    return foundUser.userInterests;
+    return interests;
   }
 
   @Override
@@ -316,8 +317,11 @@ public final class Controller implements RawController, BasicController {
     final User foundUser = model.userById().first(user1);
     final User followedUser = model.userById().first(user2);
 
+    Collection<Uuid> interests = null;
+
     if(foundUser != null && followedUser != null) {
       foundUser.userInterests.remove(followedUser.id);
+      interests = foundUser.userInterests;
 
       LOG.info(
               "removeUserInterest success (user.id=%s user.id=%s)",
@@ -330,7 +334,7 @@ public final class Controller implements RawController, BasicController {
               followedUser.id);
     }
 
-    return foundUser.userInterests;
+    return interests;
   }
 
   @Override
@@ -338,9 +342,12 @@ public final class Controller implements RawController, BasicController {
     final User foundUser = model.userById().first(user);
     final ConversationHeader foundConvo = model.conversationById().first(interest);
 
+    Collection<Uuid> interests = null;
+
     if(foundUser != null && foundConvo != null) {
       foundUser.conversationInterests.add(foundConvo.id);
       foundConvo.unseenMessages.put(foundUser.id, 0);
+      interests = foundUser.conversationInterests;
 
       LOG.info(
               "newConversationInterest success (user.id=%s conversation.id=%s)",
@@ -353,7 +360,7 @@ public final class Controller implements RawController, BasicController {
               foundConvo.id);
     }
 
-    return foundUser.conversationInterests;
+    return interests;
   }
 
   @Override
@@ -361,8 +368,11 @@ public final class Controller implements RawController, BasicController {
     final User foundUser = model.userById().first(user);
     final ConversationHeader foundConvo = model.conversationById().first(interest);
 
+    Collection<Uuid> interests = null;
+
     if(foundUser != null && foundConvo != null) {
       foundUser.conversationInterests.remove(foundConvo.id);
+      interests = foundUser.conversationInterests;
 
       LOG.info(
               "removeConversationInterest success (user.id=%s conversation.id=%s)",
@@ -375,7 +385,7 @@ public final class Controller implements RawController, BasicController {
               foundConvo.id);
     }
 
-    return foundUser.conversationInterests;
+    return interests;
   }
 
   @Override

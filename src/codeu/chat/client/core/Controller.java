@@ -41,6 +41,29 @@ public class Controller implements BasicController {
     this.source = source;
   }
 
+  private Integer toggleAccessControlBit(Uuid convo, Uuid user, Boolean flag, int request, int response){
+    Integer accessControl = 0;
+
+    try(final Connection connection = source.connect()){
+
+      Serializers.INTEGER.write(connection.out(), request);
+      Uuid.SERIALIZER.write(connection.out(), convo);
+      Uuid.SERIALIZER.write(connection.out(), user);
+      Serializers.BOOLEAN.write(connection.out(), flag);
+
+      if(Serializers.INTEGER.read(connection.in()) == response){
+        accessControl = Serializers.INTEGER.read(connection.in());
+      } else {
+        LOG.error("Response from server failed.");
+      }
+    } catch (Exception ex){
+      System.out.println("ERROR: Exception during call on server. Check log for details.");
+      LOG.error(ex, "Exception during call on server.");
+    }
+
+    return accessControl;
+  }
+
   @Override
   public Integer toggleRemovedBit(Uuid convo, Uuid user){
     Integer response = 0;
@@ -66,74 +89,17 @@ public class Controller implements BasicController {
 
   @Override
   public Integer toggleMemberBit(Uuid convo, Uuid user, Boolean flag){
-    Integer response = 0;
-
-    try(final Connection connection = source.connect()){
-
-      Serializers.INTEGER.write(connection.out(), NetworkCode.TOGGLE_MEMBER_BIT_REQUEST);
-      Uuid.SERIALIZER.write(connection.out(), convo);
-      Uuid.SERIALIZER.write(connection.out(), user);
-      Serializers.BOOLEAN.write(connection.out(), flag);
-
-      if(Serializers.INTEGER.read(connection.in()) == NetworkCode.TOGGLE_MEMBER_BIT_RESPONSE){
-        response = Serializers.INTEGER.read(connection.in());
-      } else {
-        LOG.error("Response from server failed.");
-      }
-    } catch (Exception ex){
-      System.out.println("ERROR: Exception during call on server. Check log for details.");
-      LOG.error(ex, "Exception during call on server.");
-    }
-
-    return response;
+    return toggleAccessControlBit(convo, user, flag, NetworkCode.TOGGLE_MEMBER_BIT_REQUEST, NetworkCode.TOGGLE_MEMBER_BIT_RESPONSE);
   }
 
   @Override
   public Integer toggleOwnerBit(Uuid convo, Uuid user, Boolean flag){
-    Integer response = 0;
-
-    try(final Connection connection = source.connect()){
-
-      Serializers.INTEGER.write(connection.out(), NetworkCode.TOGGLE_OWNER_BIT_REQUEST);
-      Uuid.SERIALIZER.write(connection.out(), convo);
-      Uuid.SERIALIZER.write(connection.out(), user);
-      Serializers.BOOLEAN.write(connection.out(), flag);
-
-      if(Serializers.INTEGER.read(connection.in()) == NetworkCode.TOGGLE_OWNER_BIT_RESPONSE){
-        response = Serializers.INTEGER.read(connection.in());
-      } else {
-        LOG.error("Response from server failed.");
-      }
-    } catch (Exception ex){
-      System.out.println("ERROR: Exception during call on server. Check log for details.");
-      LOG.error(ex, "Exception during call on server.");
-    }
-
-    return response;
+    return toggleAccessControlBit(convo, user, flag, NetworkCode.TOGGLE_OWNER_BIT_REQUEST, NetworkCode.TOGGLE_OWNER_BIT_RESPONSE);
   }
 
   @Override
   public Integer toggleCreatorBit(Uuid convo, Uuid user, Boolean flag){
-    Integer response = 0;
-
-    try(final Connection connection = source.connect()){
-
-      Serializers.INTEGER.write(connection.out(), NetworkCode.TOGGLE_CREATOR_BIT_REQUEST);
-      Uuid.SERIALIZER.write(connection.out(), convo);
-      Uuid.SERIALIZER.write(connection.out(), user);
-      Serializers.BOOLEAN.write(connection.out(), flag);
-
-      if(Serializers.INTEGER.read(connection.in()) == NetworkCode.TOGGLE_CREATOR_BIT_RESPONSE){
-        response = Serializers.INTEGER.read(connection.in());
-      } else {
-        LOG.error("Response from server failed.");
-      }
-    } catch (Exception ex){
-      System.out.println("ERROR: Exception during call on server. Check log for details.");
-      LOG.error(ex, "Exception during call on server.");
-    }
-
-    return response;
+    return toggleAccessControlBit(convo, user, flag, NetworkCode.TOGGLE_CREATOR_BIT_REQUEST, NetworkCode.TOGGLE_CREATOR_BIT_RESPONSE);
   }
 
   @Override
