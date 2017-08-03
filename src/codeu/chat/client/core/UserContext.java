@@ -20,6 +20,7 @@ import codeu.chat.common.BasicController;
 import codeu.chat.common.BasicView;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.User;
+import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 
 public final class UserContext {
@@ -28,14 +29,10 @@ public final class UserContext {
   private final BasicView view;
   private final BasicController controller;
 
-  public Set<Uuid> newConversations;
-
   public UserContext(User user, BasicView view, BasicController controller) {
     this.user = user;
     this.view = view;
     this.controller = controller;
-
-    newConversations = new HashSet<>();
   }
 
   public ConversationContext start(String name) {
@@ -45,6 +42,37 @@ public final class UserContext {
       return new ConversationContext(user, conversation, view, controller);
     }
     return null;
+  }
+
+  public Time setStatusUpdate(Time time){ return controller.updateUsersLastStatusUpdate(this.user.id, time); }
+
+  public Time getLastStatusUpdate(){ return view.getLastStatusUpdate(this.user.id); }
+
+  // UPDATED CONVERSATIONS
+  public Map<Uuid, Time> addUpdatedConversation(Uuid convo, Time time) { return controller.newUpdatedConversation(this.user.id, convo, time); }
+
+  public Map<Uuid, Time> getUpdatedConversations(){ return view.getUpdatedConversations(this.user.id); }
+
+  // INTERESTS - CONVERSATIONS
+  public Collection<Uuid> addConversationInterest(Uuid id){ return controller.newConversationInterest(this.user.id, id); }
+
+  public Collection<Uuid> removeConversationInterest(Uuid id){ return controller.removeConversationInterest(this.user.id, id); }
+
+  public Collection<Uuid> getConversationInterests(){
+    return view.getConversationInterests(this.user.id);
+  }
+
+  // INTERESTS - USER
+  public Collection<Uuid> addUserInterest(Uuid id){
+    return controller.newUserInterest(this.user.id, id);
+  }
+
+  public Collection<Uuid> removeUserInterest(Uuid id){
+    return controller.removeUserInterest(this.user.id, id);
+  }
+
+  public Collection<Uuid> getUserInterests(){
+    return view.getUserInterests(this.user.id);
   }
 
   public HashMap<Uuid, ConversationContext> conversations() {

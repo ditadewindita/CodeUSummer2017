@@ -14,13 +14,11 @@
 
 package codeu.chat.server;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
 import codeu.chat.common.*;
 import codeu.chat.util.Logger;
+import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 import codeu.chat.util.store.StoreAccessor;
 
@@ -42,18 +40,37 @@ public final class View implements BasicView, SinglesView {
   }
 
   @Override
+  public Time getLastStatusUpdate(Uuid user){ return model.userById().first(user).lastStatusUpdate; }
+
+  @Override
   public Collection<ConversationHeader> getConversations() {
     return all(model.conversationById());
-  }
-
-  public Collection<ConversationHeader> getConversationAccessControls() {
-    return all(model.conversationByAccessControl());
   }
 
   @Override
   public Collection<ConversationPayload> getConversationPayloads(Collection<Uuid> ids) {
     return intersect(model.conversationPayloadById(), ids);
   }
+
+  @Override
+  public Integer getUserAccessControl(Uuid convo, Uuid user){
+    Integer access = model.conversationByAccessControl().first(convo).computeIfAbsent(user, newAccess -> 0);
+    return access;
+  }
+
+  @Override
+  public Integer getUnseenMessagesCount(Uuid user, Uuid convo){
+    return model.conversationByUnseenMessages().first(convo).get(user);
+  }
+
+  @Override
+  public Map<Uuid, Time> getUpdatedConversations(Uuid user){ return model.userByUpdatedConversations().first(user); }
+
+  @Override
+  public Collection<Uuid> getConversationInterests(Uuid user){ return model.userByConversationInterest().first(user); }
+
+  @Override
+  public Collection<Uuid> getUserInterests(Uuid user){ return model.userbyUserInterest().first(user); }
 
   @Override
   public ServerInfo getInfo() {

@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -53,10 +54,19 @@ public final class User {
   public final String name;
   public final Time creation;
 
+  public final Set<Uuid> conversationInterests;
+  public final Set<Uuid> userInterests;
+  public final HashMap<Uuid, Time> updatedConversations;
+  public Time lastStatusUpdate;
+
   public User(Uuid id, String name, Time creation) {
 
     this.id = id;
     this.name = name;
     this.creation = creation;
+    this.conversationInterests = new HashSet<>();
+    this.userInterests = new HashSet<>();
+    this.updatedConversations = new HashMap<>();
+    this.lastStatusUpdate = this.creation;
   }
 }

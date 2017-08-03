@@ -153,6 +153,30 @@ public final class Serializers {
     };
   }
 
+  public static <K, V> Serializer<Map<K, V>> map(final Serializer<K> serializerKey, final Serializer<V> serializerValue) {
+
+    return new Serializer<Map<K, V>>() {
+      @Override
+      public void write(OutputStream out, Map<K, V> value) throws IOException {
+        INTEGER.write(out, value.size());
+        for(final K k : value.keySet()){
+          serializerKey.write(out, k);
+          serializerValue.write(out, value.get(k));
+        }
+      }
+
+      @Override
+      public Map<K, V> read(InputStream in) throws IOException {
+        final int size = INTEGER.read(in);
+        Map<K, V> map = new HashMap<>(size);
+        for(int i = 0; i < size; i++) {
+          map.put(serializerKey.read(in), serializerValue.read(in));
+        }
+        return map;
+      }
+    };
+  }
+
   public static <T> Serializer<T> nullable(final Serializer<T> serializer) {
 
     final int NO_VALUE = 0x00;
