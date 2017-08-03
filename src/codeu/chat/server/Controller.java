@@ -15,8 +15,11 @@
 package codeu.chat.server;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
+import codeu.chat.client.core.ConversationContext;
 import codeu.chat.common.BasicController;
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
@@ -53,6 +56,336 @@ public final class Controller implements RawController, BasicController {
   @Override
   public ConversationHeader newConversation(String title, Uuid owner) {
     return newConversation(createId(), title, owner, Time.now());
+  }
+
+  @Override
+  public Integer toggleRemovedBit(Uuid convo, Uuid user){
+    final ConversationHeader foundConvo = model.conversationById().first(convo);
+    final User foundUser = model.userById().first(user);
+
+    Integer result = 0;
+
+    if(foundConvo != null && foundUser != null) {
+      Integer access = foundConvo.accessControls.getOrDefault(user, 0);
+      // Flag is set to true if the user is removed from a conversation.
+      // Flag stays true once it's set.
+      Integer newAccess = access | ConversationHeader.REMOVED;
+      result = newAccess;
+
+      foundConvo.accessControls.put(user, newAccess);
+
+      LOG.info(
+              "toggleRemovedBit success (user.id=%s conversation.id=%s access=%s)",
+              foundUser.id,
+              foundConvo.id,
+              newAccess);
+    } else {
+      LOG.info(
+              "toggleRemovedBit fail (user.id=%s conversation.id=%s)",
+              foundUser.id,
+              foundConvo.id);
+    }
+
+    return result;
+  }
+
+  @Override
+  public Integer toggleCreatorBit(Uuid convo, Uuid user, Boolean flag){
+    final ConversationHeader foundConvo = model.conversationById().first(convo);
+    final User foundUser = model.userById().first(user);
+
+    Integer result = 0;
+
+    if(foundConvo != null && foundUser != null) {
+      Integer access = foundConvo.accessControls.getOrDefault(user, 0);
+      Integer newAccess;
+
+      // If user is to be set as a Creator, it will also be it's children controls
+      if(flag) {
+        newAccess = access | ConversationHeader.CREATOR;
+        newAccess |= ConversationHeader.OWNER;
+        newAccess |= ConversationHeader.MEMBER;
+      }
+      else
+        newAccess = access & ~ConversationHeader.CREATOR;
+
+      result = newAccess;
+      foundConvo.accessControls.put(user, newAccess);
+
+      LOG.info(
+              "toggleCreatorBit success (user.id=%s conversation.id=%s access=%s)",
+              foundUser.id,
+              foundConvo.id,
+              newAccess);
+    } else {
+      LOG.info(
+              "toggleCreatorBit fail (user.id=%s conversation.id=%s)",
+              foundUser.id,
+              foundConvo.id);
+    }
+
+    return result;
+  }
+
+  @Override
+  public Integer toggleOwnerBit(Uuid convo, Uuid user, Boolean flag){
+    final ConversationHeader foundConvo = model.conversationById().first(convo);
+    final User foundUser = model.userById().first(user);
+
+    Integer result = 0;
+
+    if(foundConvo != null && foundUser != null) {
+      Integer access = foundConvo.accessControls.getOrDefault(user, 0);
+      Integer newAccess;
+
+      // If user is to be set as an Owner, it will also be it's children controls
+      if(flag){
+        newAccess = access | ConversationHeader.OWNER;
+        newAccess |= ConversationHeader.MEMBER;
+      }
+      // If user is not an Owner anymore, it is also not it's parent controls anymore
+      else {
+        newAccess = access & ~ConversationHeader.OWNER;
+        newAccess &= ~ConversationHeader.CREATOR;
+      }
+
+      result = newAccess;
+      foundConvo.accessControls.put(user, newAccess);
+
+      LOG.info(
+              "toggleOwnerBit success (user.id=%s conversation.id=%s access=%s)",
+              foundUser.id,
+              foundConvo.id,
+              newAccess);
+    } else {
+      LOG.info(
+              "toggleOwnerBit fail (user.id=%s conversation.id=%s)",
+              foundUser.id,
+              foundConvo.id);
+    }
+
+    return result;
+  }
+
+  @Override
+  public Integer toggleMemberBit(Uuid convo, Uuid user, Boolean flag){
+    final ConversationHeader foundConvo = model.conversationById().first(convo);
+    final User foundUser = model.userById().first(user);
+
+    Integer result = 0;
+
+    if(foundConvo != null && foundUser != null) {
+      Integer access = foundConvo.accessControls.getOrDefault(user, 0);
+      Integer newAccess;
+
+      if(flag)
+        newAccess = access | ConversationHeader.MEMBER;
+        // If member bit is to be 'turned off', also turn off it's parent controls
+      else {
+        newAccess = access & ~ConversationHeader.MEMBER;
+        newAccess &= ~ConversationHeader.OWNER;
+        newAccess &= ~ConversationHeader.CREATOR;
+      }
+
+      result = newAccess;
+      foundConvo.accessControls.put(user, newAccess);
+
+      LOG.info(
+              "toggleMemberBit success (user.id=%s conversation.id=%s access=%s)",
+              foundUser.id,
+              foundConvo.id,
+              newAccess);
+    } else {
+      LOG.info(
+              "toggleMemberBit fail (user.id=%s conversation.id=%s)",
+              foundUser.id,
+              foundConvo.id);
+    }
+
+    return result;
+  }
+
+  @Override
+  public Integer updateUsersUnseenMessagesCount(Uuid user, Uuid convo, Integer count){
+    final User foundUser = model.userById().first(user);
+    final ConversationHeader foundConvo = model.conversationById().first(convo);
+
+    Integer result = 0;
+
+    if(foundUser != null && foundConvo != null){
+      Integer currentCount = foundConvo.unseenMessages.getOrDefault(foundUser, 0);
+      Integer setCount = Math.max(0, currentCount + count);
+
+      foundConvo.unseenMessages.put(foundUser.id, setCount);
+
+      result = foundConvo.unseenMessages.get(foundUser.id);
+
+      LOG.info(
+              "updateUsersUnseenMessagesCount success (user.id=%s conversation.id=%s count=%s)",
+              foundUser.id,
+              foundConvo.id,
+              setCount);
+    } else {
+      LOG.info(
+              "updateUsersUnseenMessagesCount fail (user.id=%s conversation.id=%s)",
+              foundUser.id,
+              foundConvo.id);
+    }
+
+    return result;
+  }
+
+  @Override
+  public Time updateUsersLastStatusUpdate(Uuid user, Time time){
+    final User foundUser = model.userById().first(user);
+
+    Time update = null;
+
+    if(foundUser != null && time.inMs() > foundUser.creation.inMs()){
+      foundUser.lastStatusUpdate = time;
+      update = foundUser.lastStatusUpdate;
+
+      LOG.info(
+              "updateUsersLastStatusUpdate success (user.id=%s time=%s)",
+              foundUser.id,
+              time.inMs());
+    } else {
+
+      LOG.info(
+              "updateUsersLastStatusUpdate fail (user.id=%s time=%s)",
+              foundUser.id,
+              time.inMs());
+    }
+
+    return update;
+  }
+
+  @Override
+  public Map<Uuid, Time> newUpdatedConversation(Uuid user, Uuid convo, Time time){
+    final User foundUser = model.userById().first(user);
+    final ConversationHeader foundConversation = model.conversationById().first(convo);
+
+    Map<Uuid, Time> map = null;
+
+    if(foundUser != null && foundConversation != null){
+      foundUser.updatedConversations.put(foundConversation.id, time);
+      map = foundUser.updatedConversations;
+
+      LOG.info(
+              "newUpdatedConversation success (user.id=%s conversation.id=%s time=%s)",
+              foundUser.id,
+              foundConversation.id,
+              time.inMs());
+    } else {
+      LOG.info(
+              "newUpdatedConversation fail (user.id=%s conversation.id=%s time=%s)",
+              foundUser.id,
+              foundConversation.id,
+              time.inMs());
+    }
+
+    return map;
+  }
+
+  @Override
+  public Collection<Uuid> newUserInterest(Uuid user1, Uuid user2){
+    final User foundUser = model.userById().first(user1);
+    final User followedUser = model.userById().first(user2);
+
+    Collection<Uuid> interests = null;
+
+    if(foundUser != null && followedUser != null) {
+      foundUser.userInterests.add(followedUser.id);
+      interests = foundUser.userInterests;
+
+      LOG.info(
+              "newUserInterest success (user.id=%s user.id=%s)",
+              foundUser.id,
+              followedUser.id);
+    } else {
+      LOG.info(
+              "newUserInterest fail - user/followed user doesn't exist (user.id=%s user.id=%s)",
+              foundUser.id,
+              followedUser.id);
+    }
+
+    return interests;
+  }
+
+  @Override
+  public Collection<Uuid> removeUserInterest(Uuid user1, Uuid user2){
+    final User foundUser = model.userById().first(user1);
+    final User followedUser = model.userById().first(user2);
+
+    Collection<Uuid> interests = null;
+
+    if(foundUser != null && followedUser != null) {
+      foundUser.userInterests.remove(followedUser.id);
+      interests = foundUser.userInterests;
+
+      LOG.info(
+              "removeUserInterest success (user.id=%s user.id=%s)",
+              foundUser.id,
+              followedUser.id);
+    } else {
+      LOG.info(
+              "removeUserInterest fail - user/followed user doesn't exist (user.id=%s user.id=%s)",
+              foundUser.id,
+              followedUser.id);
+    }
+
+    return interests;
+  }
+
+  @Override
+  public Collection<Uuid> newConversationInterest(Uuid user, Uuid interest){
+    final User foundUser = model.userById().first(user);
+    final ConversationHeader foundConvo = model.conversationById().first(interest);
+
+    Collection<Uuid> interests = null;
+
+    if(foundUser != null && foundConvo != null) {
+      foundUser.conversationInterests.add(foundConvo.id);
+      foundConvo.unseenMessages.put(foundUser.id, 0);
+      interests = foundUser.conversationInterests;
+
+      LOG.info(
+              "newConversationInterest success (user.id=%s conversation.id=%s)",
+              foundUser.id,
+              foundConvo.id);
+    } else {
+      LOG.info(
+              "newConversationInterest fail - user/conversation does not exist (user.id=%s conversation.id=%s)",
+              foundUser.id,
+              foundConvo.id);
+    }
+
+    return interests;
+  }
+
+  @Override
+  public Collection<Uuid> removeConversationInterest(Uuid user, Uuid interest){
+    final User foundUser = model.userById().first(user);
+    final ConversationHeader foundConvo = model.conversationById().first(interest);
+
+    Collection<Uuid> interests = null;
+
+    if(foundUser != null && foundConvo != null) {
+      foundUser.conversationInterests.remove(foundConvo.id);
+      interests = foundUser.conversationInterests;
+
+      LOG.info(
+              "removeConversationInterest success (user.id=%s conversation.id=%s)",
+              foundUser.id,
+              foundConvo.id);
+    } else {
+      LOG.info(
+              "removeConversationInterest fail - user/conversation doesn't exist (user.id=%s conversation.id=%s)",
+              foundUser.id,
+              foundConvo.id);
+    }
+
+    return interests;
   }
 
   @Override

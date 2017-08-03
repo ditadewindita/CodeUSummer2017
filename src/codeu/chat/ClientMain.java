@@ -31,55 +31,6 @@ final class ClientMain {
 
   private static Chat chat;
 
-  private static void reloadOldInterests() throws IOException {
-    // Open the transaction log file for reading
-    BufferedReader bufferedReader = new BufferedReader(new FileReader("data/transaction_log.txt"));
-
-    // Read the header lines of each transaction log
-    String line;
-
-    System.out.println("Loading interest system...");
-
-    while((line = bufferedReader.readLine()) != null) {
-
-      // Instantiate a Tokenizer to parse through log's data
-      Tokenizer logInfo = new Tokenizer(line);
-
-      String commandType = logInfo.next();
-
-      if(commandType.equals("ADD-INTEREST-USER")){
-        Uuid owner = Uuid.parse(logInfo.next());
-        Uuid follow = Uuid.parse(logInfo.next());
-
-        chat.addUserInterest(owner, follow);
-      }
-      else if(commandType.equals("REMOVE-INTEREST-USER")){
-        Uuid owner = Uuid.parse(logInfo.next());
-        Uuid follow = Uuid.parse(logInfo.next());
-
-        chat.removeUserInterest(owner, follow);
-      }
-      else if(commandType.equals("ADD-INTEREST-CONVERSATION")){
-        Uuid owner = Uuid.parse(logInfo.next());
-        Uuid follow = Uuid.parse(logInfo.next());
-
-        chat.addConvoInterest(owner, follow);
-      }
-      else if(commandType.equals("REMOVE-INTEREST-CONVERSATION")){
-        Uuid owner = Uuid.parse(logInfo.next());
-        Uuid follow = Uuid.parse(logInfo.next());
-
-        chat.removeConvoInterest(owner, follow);
-      }
-    }
-
-    LOG.info("Successfully restored last logged interest system state.");
-
-    System.out.println("Successfully loaded interest system!");
-
-    bufferedReader.close();
-  }
-
   public static void main(String [] args) {
 
     try {
@@ -101,13 +52,6 @@ final class ClientMain {
     chat = new Chat(new Context(source));
 
     LOG.info("Created client");
-
-    // Reload old interests
-    try {
-      reloadOldInterests();
-    } catch (Exception e) {
-      LOG.info("Could not reload last logged interest system.");
-    }
 
     boolean keepRunning = true;
 

@@ -78,6 +78,26 @@ public final class ConversationContext {
         getMessage(updated.lastMessage);
   }
 
+  public Integer getUserAccessControl(Uuid user){
+    return view.getUserAccessControl(this.conversation.id, user);
+  }
+
+  public Integer toggleMemberBit(Uuid user, Boolean flag){
+    return controller.toggleMemberBit(this.conversation.id, user, flag);
+  }
+
+  public Integer toggleOwnerBit(Uuid user, Boolean flag){
+    return controller.toggleOwnerBit(this.conversation.id, user, flag);
+  }
+
+  public Integer toggleCreatorBit(Uuid user, Boolean flag){
+    return controller.toggleCreatorBit(this.conversation.id, user, flag);
+  }
+
+  public Integer toggleRemovedBit(Uuid user){
+    return controller.toggleRemovedBit(this.conversation.id, user);
+  }
+
   private ConversationPayload getUpdated() {
     final Collection<Uuid> ids = Arrays.asList(conversation.id);
     final Iterator<ConversationPayload> payloads = view.getConversationPayloads(ids).iterator();
@@ -88,4 +108,9 @@ public final class ConversationContext {
     final Iterator<Message> messages = view.getMessages(Arrays.asList(id)).iterator();
     return messages.hasNext() ? new MessageContext(messages.next(), view) : null;
   }
+
+  public Integer getUnseenMessagesCount(Uuid user){ return view.getUnseenMessagesCount(user, this.conversation.id); }
+
+  public Integer setUnseenMessagesCount(Uuid user, Integer count){ return controller.updateUsersUnseenMessagesCount(user, this.conversation.id, count); }
+
 }

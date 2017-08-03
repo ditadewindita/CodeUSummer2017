@@ -175,6 +175,229 @@ public final class Server {
       }
     });
 
+    // Get Conversation Interests - A client wants to see their list of interested conversations
+    this.commands.put(NetworkCode.GET_CONVERSATION_INTERESTS_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid id = Uuid.SERIALIZER.read(in);
+        final Collection<Uuid> interests = view.getConversationInterests(id);
+
+        Serializers.INTEGER.write(out, NetworkCode.GET_CONVERSATION_INTERESTS_RESPONSE);
+        Serializers.collection(Uuid.SERIALIZER).write(out, interests);
+      }
+    });
+
+    // Add Conversation Interest - A client wants to add a new conversation to their list of interests
+    this.commands.put(NetworkCode.NEW_CONVERSATION_INTEREST_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Uuid convoId = Uuid.SERIALIZER.read(in);
+        final Collection<Uuid> interests = controller.newConversationInterest(userId, convoId);
+
+        Serializers.INTEGER.write(out, NetworkCode.NEW_CONVERSATION_INTEREST_RESPONSE);
+        Serializers.collection(Uuid.SERIALIZER).write(out, interests);
+      }
+    });
+
+    // Get User Interests - A client wants to see their list of interested conversations
+    this.commands.put(NetworkCode.GET_USER_INTERESTS_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid id = Uuid.SERIALIZER.read(in);
+        final Collection<Uuid> interests = view.getUserInterests(id);
+
+        Serializers.INTEGER.write(out, NetworkCode.GET_USER_INTERESTS_RESPONSE);
+        Serializers.collection(Uuid.SERIALIZER).write(out, interests);
+      }
+    });
+
+    // Add User Interest - A client wants to add a new conversation to their list of interests
+    this.commands.put(NetworkCode.NEW_USER_INTEREST_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Uuid followedUserId = Uuid.SERIALIZER.read(in);
+        final Collection<Uuid> interests = controller.newUserInterest(userId, followedUserId);
+
+        Serializers.INTEGER.write(out, NetworkCode.NEW_USER_INTEREST_RESPONSE);
+        Serializers.collection(Uuid.SERIALIZER).write(out, interests);
+      }
+    });
+
+    // Remove User Interest - A client wants to add a new conversation to their list of interests
+    this.commands.put(NetworkCode.REMOVE_USER_INTEREST_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Uuid followedUserId = Uuid.SERIALIZER.read(in);
+        final Collection<Uuid> interests = controller.removeUserInterest(userId, followedUserId);
+
+        Serializers.INTEGER.write(out, NetworkCode.REMOVE_USER_INTEREST_RESPONSE);
+        Serializers.collection(Uuid.SERIALIZER).write(out, interests);
+      }
+    });
+
+    // Add Conversation Interest - A client wants to add a new conversation to their list of interests
+    this.commands.put(NetworkCode.REMOVE_CONVERSATION_INTEREST_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Uuid convoId = Uuid.SERIALIZER.read(in);
+        final Collection<Uuid> interests = controller.removeConversationInterest(userId, convoId);
+
+        Serializers.INTEGER.write(out, NetworkCode.REMOVE_CONVERSATION_INTEREST_RESPONSE);
+        Serializers.collection(Uuid.SERIALIZER).write(out, interests);
+      }
+    });
+
+    // Add Updated Conversation - A client wants to add a conversation to their list of updated conversations
+    this.commands.put(NetworkCode.NEW_UPDATED_CONVERSATION_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Uuid convoId = Uuid.SERIALIZER.read(in);
+        final Time time = Time.SERIALIZER.read(in);
+        final Map<Uuid, Time> updated = controller.newUpdatedConversation(userId, convoId, time);
+
+        Serializers.INTEGER.write(out, NetworkCode.NEW_UPDATED_CONVERSATION_RESPONSE);
+        Serializers.map(Uuid.SERIALIZER, Time.SERIALIZER).write(out, updated);
+      }
+    });
+
+    // Get Updated Conversations - A client wants to view their updated conversations
+    this.commands.put(NetworkCode.GET_UPDATED_CONVERSATIONS_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Map<Uuid, Time> updated = view.getUpdatedConversations(userId);
+
+        Serializers.INTEGER.write(out, NetworkCode.GET_UPDATED_CONVERSATIONS_RESPONSE);
+        Serializers.map(Uuid.SERIALIZER, Time.SERIALIZER).write(out, updated);
+      }
+    });
+
+    // Update User's Last Status Update - A client wants to update their last status update time
+    this.commands.put(NetworkCode.UPDATE_USER_LAST_STATUS_UPDATE_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Time update = Time.SERIALIZER.read(in);
+        final Time lastUpdate = controller.updateUsersLastStatusUpdate(userId, update);
+
+        Serializers.INTEGER.write(out, NetworkCode.UPDATE_USER_LAST_STATUS_UPDATE_RESPONSE);
+        Time.SERIALIZER.write(out, lastUpdate);
+      }
+    });
+
+    // Get User's Last Status Update - A client wants to get their last status update time
+    this.commands.put(NetworkCode.GET_USER_LAST_STATUS_UPDATE_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Time update = view.getLastStatusUpdate(userId);
+
+        Serializers.INTEGER.write(out, NetworkCode.GET_USER_LAST_STATUS_UPDATE_RESPONSE);
+        Time.SERIALIZER.write(out, update);
+      }
+    });
+
+    // Get User's Unseen Messages Count - A client wants to see the number of messages that they have not viewed
+    this.commands.put(NetworkCode.GET_USER_MESSAGE_COUNT_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Uuid convoId = Uuid.SERIALIZER.read(in);
+        final Integer count = view.getUnseenMessagesCount(userId, convoId);
+
+        Serializers.INTEGER.write(out, NetworkCode.GET_USER_MESSAGE_COUNT_RESPONSE);
+        Serializers.INTEGER.write(out, count);
+      }
+    });
+
+    // Update User's Unseen Messages Count - A client wants to update the number of messages that they have not viewed
+    this.commands.put(NetworkCode.UPDATE_USER_MESSAGE_COUNT_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Uuid convoId = Uuid.SERIALIZER.read(in);
+        final Integer count = Serializers.INTEGER.read(in);
+        final Integer newCount = controller.updateUsersUnseenMessagesCount(userId, convoId, count);
+
+        Serializers.INTEGER.write(out, NetworkCode.UPDATE_USER_MESSAGE_COUNT_RESPONSE);
+        Serializers.INTEGER.write(out, newCount);
+      }
+    });
+
+    // Toggle User's Member Bit - A client wants to toggle the member bit of a user in a specific conversation
+    this.commands.put(NetworkCode.TOGGLE_MEMBER_BIT_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid convoId = Uuid.SERIALIZER.read(in);
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Boolean flag = Serializers.BOOLEAN.read(in);
+        final Integer access = controller.toggleMemberBit(convoId, userId, flag);
+
+        Serializers.INTEGER.write(out, NetworkCode.TOGGLE_MEMBER_BIT_RESPONSE);
+        Serializers.INTEGER.write(out, access);
+      }
+    });
+
+    // Toggle User's Owner Bit - A client wants to toggle the owner bit of a user in a specific conversation
+    this.commands.put(NetworkCode.TOGGLE_OWNER_BIT_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid convoId = Uuid.SERIALIZER.read(in);
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Boolean flag = Serializers.BOOLEAN.read(in);
+        final Integer access = controller.toggleOwnerBit(convoId, userId, flag);
+
+        Serializers.INTEGER.write(out, NetworkCode.TOGGLE_OWNER_BIT_RESPONSE);
+        Serializers.INTEGER.write(out, access);
+      }
+    });
+
+    // Toggle User's Owner Bit - A client wants to toggle the owner bit of a user in a specific conversation
+    this.commands.put(NetworkCode.TOGGLE_CREATOR_BIT_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid convoId = Uuid.SERIALIZER.read(in);
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Boolean flag = Serializers.BOOLEAN.read(in);
+        final Integer access = controller.toggleCreatorBit(convoId, userId, flag);
+
+        Serializers.INTEGER.write(out, NetworkCode.TOGGLE_CREATOR_BIT_RESPONSE);
+        Serializers.INTEGER.write(out, access);
+      }
+    });
+
+    // Toggle User's Owner Bit - A client wants to toggle the owner bit of a user in a specific conversation
+    this.commands.put(NetworkCode.TOGGLE_REMOVED_BIT_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid convoId = Uuid.SERIALIZER.read(in);
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Integer access = controller.toggleRemovedBit(convoId, userId);
+
+        Serializers.INTEGER.write(out, NetworkCode.TOGGLE_REMOVED_BIT_RESPONSE);
+        Serializers.INTEGER.write(out, access);
+      }
+    });
+
+    // Get User's Access Control - A client wants to see the access control of a user
+    this.commands.put(NetworkCode.GET_USER_ACCESS_CONTROL_REQUEST, new Command(){
+      @Override
+      public void onMessage(InputStream in, OutputStream out) throws IOException {
+        final Uuid convoId = Uuid.SERIALIZER.read(in);
+        final Uuid userId = Uuid.SERIALIZER.read(in);
+        final Integer access = view.getUserAccessControl(convoId, userId);
+
+        Serializers.INTEGER.write(out, NetworkCode.GET_USER_ACCESS_CONTROL_RESPONSE);
+        Serializers.INTEGER.write(out, access);
+      }
+    });
+
+
     this.timeline.scheduleNow(new Runnable() {
       @Override
       public void run() {
@@ -204,9 +427,9 @@ public final class Server {
     BufferedReader bufferedReader = new BufferedReader(fileReader);
 
     // Read the header lines of each transaction log
-    String line = bufferedReader.readLine();
+    String line;
 
-    while(line != null) {
+    while((line = bufferedReader.readLine()) != null) {
 
       // Instantiate a Tokenizer to parse through log's data
       Tokenizer logInfo = new Tokenizer(line);
@@ -250,7 +473,59 @@ public final class Server {
         controller.newMessage(commandUuid, ownerUuid, convoUuid, messageContent, commandCreation);
       }
 
-      line = bufferedReader.readLine();
+      // INTEREST SYSTEM
+      else if(commandType.equals("ADD-INTEREST-USER")){
+        Uuid follow = Uuid.parse(logInfo.next());
+
+        controller.newUserInterest(commandUuid, follow);
+      }
+      else if(commandType.equals("REMOVE-INTEREST-USER")){
+        Uuid follow = Uuid.parse(logInfo.next());
+
+        controller.removeUserInterest(commandUuid, follow);
+      }
+      else if(commandType.equals("ADD-INTEREST-CONVERSATION")){
+        Uuid follow = Uuid.parse(logInfo.next());
+
+        controller.newConversationInterest(commandUuid, follow);
+      }
+      else if(commandType.equals("REMOVE-INTEREST-CONVERSATION")){
+        Uuid follow = Uuid.parse(logInfo.next());
+
+        controller.removeConversationInterest(commandUuid, follow);
+      }
+
+      // ACCESS CONTROL
+      if(commandType.equals("ADD-CONVO-CREATOR")){
+        Uuid user = Uuid.parse(logInfo.next());
+
+        controller.toggleCreatorBit(commandUuid, user, true);
+      }
+      else if(commandType.equals("ADD-CONVO-MEMBER")){
+        Uuid user = Uuid.parse(logInfo.next());
+
+        controller.toggleMemberBit(commandUuid, user, true);
+      }
+      else if(commandType.equals("REMOVE-CONVO-MEMBER")){
+        Uuid user = Uuid.parse(logInfo.next());
+
+        controller.toggleMemberBit(commandUuid, user, false);
+      }
+      else if(commandType.equals("REMOVE-CONVO-TOGGLE")){
+        Uuid user = Uuid.parse(logInfo.next());
+
+        controller.toggleRemovedBit(commandUuid, user);
+      }
+      else if(commandType.equals("ADD-CONVO-OWNER")){
+        Uuid user = Uuid.parse(logInfo.next());
+
+        controller.toggleOwnerBit(commandUuid, user, true);
+      }
+      else if(commandType.equals("REMOVE-CONVO-OWNER")){
+        Uuid user = Uuid.parse(logInfo.next());
+
+        controller.toggleOwnerBit(commandUuid, user, false);
+      }
     }
 
     LOG.info("Successfully restored last logged server state.");

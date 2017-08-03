@@ -15,11 +15,13 @@
 package codeu.chat.common;
 
 import java.util.Collection;
+import java.util.Map;
 
 import codeu.chat.common.ConversationHeader;
 import codeu.chat.common.ConversationPayload;
 import codeu.chat.common.Message;
 import codeu.chat.common.User;
+import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 
 // BASIC VIEW
@@ -57,4 +59,33 @@ public interface BasicView {
   //  Return the current server information
   ServerInfo getInfo();
 
+  // GET CONVERSATION INTERESTS
+  //
+  //  Return the passed user's list of interested conversations
+  Collection<Uuid> getConversationInterests(Uuid user);
+
+  // GET USER INTERESTS
+  //
+  //  Return the passed user's list of interested conversations
+  Collection<Uuid> getUserInterests(Uuid user);
+
+  // GET UPDATED CONVERSATIONS
+  //
+  //  Return the passsed user's list of updated conversations
+  Map<Uuid, Time> getUpdatedConversations(Uuid user);
+
+  // GET LAST STATUS UPDATE
+  //
+  //  Return the last time a user requested their status update
+  Time getLastStatusUpdate(Uuid user);
+
+  // GET UNSEEN MESSAGES COUNT
+  //
+  //  Returns the number of messages this user hasn't seen in a specific conversation
+  Integer getUnseenMessagesCount(Uuid user, Uuid convo);
+
+  // GET ACCESS CONTROL OF SPECIFIC USER
+  //
+  //  Return the access control integer of a specific user for a specific conversation
+  Integer getUserAccessControl(Uuid convo, Uuid user);
 }

@@ -14,9 +14,12 @@
 
 package codeu.chat.common;
 
+import codeu.chat.util.Time;
 import codeu.chat.util.Uuid;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 // BASIC CONTROLLER
 //
@@ -52,4 +55,78 @@ public interface BasicController {
   //  representing the full state of the conversation on the server.
   //  Whether conversations can have the same title is undefined.
   ConversationHeader newConversation(String title, Uuid owner);
+
+  // NEW CONVERSATION INTEREST
+  //
+  //  Add a conversation to a user's list of interested conversations.
+  //  If successful, the method will return the collection of conversations
+  //  the user is currently interested in.
+  Collection<Uuid> newConversationInterest(Uuid user, Uuid convo);
+
+  // REMOVE CONVERSATION INTEREST
+  //
+  //  Remove a conversation to a user's list of interested conversations.
+  //  If successful, the method will return the collection of conversations
+  //  the user is currently interested in.
+  Collection<Uuid> removeConversationInterest(Uuid user, Uuid convo);
+
+  // NEW USER INTEREST
+  //
+  //  Add a user to a user's list of interested users.
+  //  If successful, the method will return the collection of users
+  //  the user is currently interested in.
+  Collection<Uuid> newUserInterest(Uuid user1, Uuid user2);
+
+  // REMOVE USER INTEREST
+  //
+  //  Remove a user in a user's list of interested users.
+  //  If successful, the method will return the collection of users
+  //  the user is currently interested in.
+  Collection<Uuid> removeUserInterest(Uuid user1, Uuid user2);
+
+  // NEW UPDATED CONVERSATION
+  //
+  //  Add a conversation to a user's list of updated conversations.
+  //  If successful, the method will return the collection of updated
+  //  conversations the user is currently interested in.
+  Map<Uuid, Time> newUpdatedConversation(Uuid user, Uuid convo, Time time);
+
+  // UPDATE USER'S LAST STATUS UPDATE
+  //
+  //  Update the last recorded Time a specified user requested their status update.
+  //  If successful, the method will return said user's last status update time.
+  Time updateUsersLastStatusUpdate(Uuid user, Time update);
+
+  // UPDATE USER'S UNSEEN MESSAGES COUNT
+  //
+  //  Update the user's number of unseen messages using the passed integer. Since the
+  //  integer will either be - or +, it can be seen as subtracting/adding the passed value.
+  //  If successful, the method will return the user's message count for the specified conversation.
+  Integer updateUsersUnseenMessagesCount(Uuid user, Uuid convo, Integer count);
+
+  // TOGGLE MEMBER BIT
+  //
+  // Turn the member bit of a user's access control to the specified flag. If successful, the access control
+  // integer of the specific user for the conversation will return.
+  Integer toggleMemberBit(Uuid convo, Uuid user, Boolean flag);
+
+  // TOGGLE OWNER BIT
+  //
+  // Turn the owner bit of a user's access control to the specified flag. If successful, the access control
+  // integer of the specific user for the conversation will return.
+  Integer toggleOwnerBit(Uuid convo, Uuid user, Boolean flag);
+
+  // TOGGLE CREATOR BIT
+  //
+  // Turn the creator bit of a user's access control to the specified flag. If successful, the access control
+  // integer of the specific user for the conversation will return.
+  Integer toggleCreatorBit(Uuid convo, Uuid user, Boolean flag);
+
+  // TOGGLE REMOVED BIT
+  //
+  // Turn the removed bit of a user's access control on. If successful, the access control
+  // integer of the specific user for the conversation will return.
+  Integer toggleRemovedBit(Uuid convo, Uuid user);
+
+
 }
