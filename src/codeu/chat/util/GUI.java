@@ -6,6 +6,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 
 /**
  * Created by Jiahui Chen on 7/30/2017.
@@ -37,26 +40,17 @@ public class GUI {
         switchPanel.add(rootPanel, "rootPanel");
         panelSwitcher.show(switchPanel, "rootPanel");
 
-        JPanel userList = new JPanel();
-        userList.setLayout(new BoxLayout(userList, BoxLayout.Y_AXIS));
-        JButton dummy = new JButton("user 1");
-        userList.add(dummy);
-        //TODO (optional?) add a display of users currently registered to Server to userList panel
-        //would be displayed to the left of the panel of messages in the chat
-        rootConstraints.gridx = 0;
-        rootConstraints.gridy = 0;
-        rootConstraints.gridwidth = 1;
-        rootConstraints.gridheight = 3;
-        rootPanel.add(userList, rootConstraints);
-
-        JTextArea rootTextDisplay = new JTextArea("Chat Messages", 20, 20);
-        rootTextDisplay.setLayout(new FlowLayout());
-        //In root panel there are no messages being sent so this will remain blank
+        JTextArea rootTextDisplay = new JTextArea("Application Activity:\nType in input text box and press a command button.", 20, 20);
+        rootTextDisplay.setLineWrap(true);
+        JScrollPane rootScroll = new JScrollPane(rootTextDisplay);
+        PrintStream rootOutput = new PrintStream(new GUIOutputDisplay(rootTextDisplay));
+        System.setOut(rootOutput);
+        System.setErr(rootOutput);
         rootConstraints.gridx = 1;
         rootConstraints.gridy = 0;
         rootConstraints.gridwidth = 2;
         rootConstraints.gridheight = 2;
-        rootPanel.add(rootTextDisplay, rootConstraints);
+        rootPanel.add(rootScroll, rootConstraints);
 
         //Panel with command buttons and text input
         JPanel rootInputPanel = new JPanel();
@@ -70,7 +64,6 @@ public class GUI {
         //Text input to sign in/add user
         JTextField rootTextInput = new JTextField(1);
         rootInputPanel.add(rootTextInput);
-        //TODO parse input and link it to the u-sign-in and u-add commands
 
         //Command buttons
         JPanel rootButtonPanel = new JPanel();
@@ -94,16 +87,6 @@ public class GUI {
             }
         });
         rootButtonPanel.add(addUser);
-        JButton signIn = new JButton("Sign In");
-        signIn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                chat.handleCommand("u-sign-in " + rootTextInput.getText());
-                panelSwitcher.show(switchPanel, "userPanel");
-            }
-
-        });
-        rootButtonPanel.add(signIn);
         JButton info = new JButton("Info");
         info.addActionListener(new ActionListener() {
             @Override
@@ -133,26 +116,34 @@ public class GUI {
         switchPanel.add(userPanel, "userPanel");
 //	    panelSwitcher.show(switchPanel, "userPanel");
 
-        JPanel convoList = new JPanel();
-        convoList.setLayout(new BoxLayout(convoList, BoxLayout.Y_AXIS));
-        JButton dummyConvo = new JButton("convo 1");
-        convoList.add(dummyConvo);
-        //TODO (optional?) add a display of convos currently registered to Server to convoList panel
-        //would be displayed to the left of the panel of messages in the chat
-        userConstraints.gridx = 0;
-        userConstraints.gridy = 0;
-        userConstraints.gridwidth = 1;
-        userConstraints.gridheight = 3;
-        userPanel.add(convoList, userConstraints);
+        //text display window in user panel, displays output of application
+        JTextArea userTextDisplay = new JTextArea("Application Activity:\nType in input text box and press a command button.", 20, 20);
+        userTextDisplay.setLineWrap(true);
+        userTextDisplay.setLayout(new FlowLayout());
+        PrintStream userOutput = new PrintStream(new GUIOutputDisplay(userTextDisplay));
+        JScrollPane userScroll = new JScrollPane(userTextDisplay);
 
-        //message/text display window in user panel, should not display any messages in user panel
-        JTextArea userTextDisplay = new JTextArea("Chat Messages\nType in input text box and press a command button.", 20, 20);
+        //sign in button added here since userOutput stream must be used when user switches panels
+        JButton signIn = new JButton("Sign In");
+        signIn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                chat.handleCommand("u-sign-in " + rootTextInput.getText());
+                panelSwitcher.show(switchPanel, "userPanel");
+                rootOutput.close();
+                System.setOut(userOutput);
+                System.setErr(userOutput);
+            }
+
+        });
+        rootButtonPanel.add(signIn);
+
         userTextDisplay.setLayout(new FlowLayout());
         userConstraints.gridx = 1;
         userConstraints.gridy = 0;
         userConstraints.gridwidth = 2;
         userConstraints.gridheight = 2;
-        userPanel.add(userTextDisplay, userConstraints);
+        userPanel.add(userScroll, userConstraints);
 
         //Panel with command buttons and text input
         JPanel userInputPanel = new JPanel();
@@ -166,7 +157,6 @@ public class GUI {
         //Text input for user panel commands
         JTextField userTextInput = new JTextField(1);
         userInputPanel.add(userTextInput);
-        //TODO parse input and link it to the user panel's commands
 
         //Command buttons
         JPanel userButtonPanel = new JPanel();
@@ -189,25 +179,6 @@ public class GUI {
             }
         });
         userButtonPanel.add(listConvos);
-        JButton addConvo = new JButton("Add Chat");
-        addConvo.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chat.handleCommand("c-add " + userTextInput.getText());
-                panelSwitcher.show(switchPanel, "convoPanel");
-            }
-        });
-        userButtonPanel.add(addConvo);
-        JButton joinConvo = new JButton("Join Chat");
-        joinConvo.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                chat.handleCommand("c-join " + userTextInput.getText());
-                panelSwitcher.show(switchPanel, "convoPanel");
-            }
-
-        });
-        userButtonPanel.add(joinConvo);
         JButton listInterestConvos = new JButton("List Interest Chats");
         listInterestConvos.addActionListener(new ActionListener() {
             @Override
@@ -277,6 +248,9 @@ public class GUI {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 chat.handleCommand("back");
+                userOutput.close();
+                System.setErr(rootOutput);
+                System.setOut(rootOutput);
                 panelSwitcher.show(switchPanel, "rootPanel");
             }
 
@@ -295,26 +269,44 @@ public class GUI {
         switchPanel.add(convoPanel, "convoPanel");
 //		panelSwitcher.show(switchPanel, "convoPanel");
 
-        JPanel convoUsersList = new JPanel();
-        convoUsersList.setLayout(new BoxLayout(convoUsersList, BoxLayout.Y_AXIS));
-        JButton dummyConvoUser = new JButton("convo 1");
-        convoUsersList.add(dummyConvoUser);
-        //TODO (optional?) add a display of users currently in the covo to the convoUsersList panel
-        //would be displayed to the left of the panel of messages in the chat
-        convoConstraints.gridx = 0;
-        convoConstraints.gridy = 0;
-        convoConstraints.gridwidth = 1;
-        convoConstraints.gridheight = 3;
-        convoPanel.add(convoUsersList, convoConstraints);
-
-        //message/text display window in user panel, should display any messages while in convo panel
-        JTextArea messages = new JTextArea("Chat Messages", 20, 20);
+        //message & text display window in convo panel, should display any messages/output while in convo panel
+        JTextArea messages = new JTextArea("Application Activity:\nType in input text box and press a command button.", 20, 20);
+        messages.setLineWrap(true);
         messages.setLayout(new FlowLayout());
+        PrintStream convoOutput = new PrintStream(new GUIOutputDisplay(messages));
+        JScrollPane convoScroll = new JScrollPane(messages);
+
+        JButton addConvo = new JButton("Add Chat");
+        addConvo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                chat.handleCommand("c-add " + userTextInput.getText());
+                userOutput.close();
+                System.setOut(convoOutput);
+                System.setErr(convoOutput);
+                panelSwitcher.show(switchPanel, "convoPanel");
+            }
+        });
+        userButtonPanel.add(addConvo);
+        JButton joinConvo = new JButton("Join Chat");
+        joinConvo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                chat.handleCommand("c-join " + userTextInput.getText());
+                userOutput.close();
+                System.setOut(convoOutput);
+                System.setErr(convoOutput);
+                panelSwitcher.show(switchPanel, "convoPanel");
+            }
+
+        });
+        userButtonPanel.add(joinConvo);
+
         convoConstraints.gridx = 1;
         convoConstraints.gridy = 0;
         convoConstraints.gridwidth = 2;
         convoConstraints.gridheight = 2;
-        convoPanel.add(messages, convoConstraints);
+        convoPanel.add(convoScroll, convoConstraints);
 
         //Panel with command buttons and text input
         JPanel convoInputPanel = new JPanel();
@@ -328,7 +320,6 @@ public class GUI {
         //Text input for user's messages/other conversation commands
         JTextField convoTextInput = new JTextField(1);
         convoInputPanel.add(convoTextInput);
-        //TODO parse input and link it to the conversation panel's commands
 
         //Command buttons
         JPanel convoButtonPanel = new JPanel();
@@ -395,6 +386,9 @@ public class GUI {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 chat.handleCommand("back");
+                convoOutput.close();
+                System.setOut(userOutput);
+                System.setErr(userOutput);
                 panelSwitcher.show(switchPanel, "userPanel");
             }
 
