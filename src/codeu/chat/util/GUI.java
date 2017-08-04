@@ -75,7 +75,17 @@ public class GUI {
         rootButtonPanel.add(createActionButton("List Users", () -> chat.handleCommand("u-list")));
         rootButtonPanel.add(createActionButton("Add User", () -> chat.handleCommand("u-add " + rootTextInput.getText())));
         rootButtonPanel.add(createActionButton("Info", () -> chat.handleCommand("info")));
-        rootButtonPanel.add(createActionButton("Exit", () -> chat.handleCommand("exit")));
+        JButton exit = new JButton("Exit");
+        ActionListener exitListener = new ActionListener() {
+          @Override
+           public void actionPerformed(ActionEvent arg0) {
+           chat.handleCommand("exit");
+           window.dispose();
+           System.exit(0);
+          }
+        };
+        exit.addActionListener(exitListener);
+        rootButtonPanel.add(exit);
 
 
         //User panel holding user panel's GUI, same as root panel but different buttons
@@ -150,9 +160,11 @@ public class GUI {
                 System.setOut(rootOutput);
                 panelSwitcher.show(switchPanel, "rootPanel");
             }
-
         });
-        userButtonPanel.add(createActionButton("Exit", () -> chat.handleCommand("exit")));
+        userButtonPanel.add(userBack);
+        JButton userExit = new JButton("Exit");
+        userExit.addActionListener(exitListener);
+        userButtonPanel.add(userExit);
 
 
         //Conversation panel holding conversation panel's GUI, same as root panel but different buttons
@@ -215,14 +227,18 @@ public class GUI {
 
         //Command buttons
         JPanel convoButtonPanel = new JPanel();
-        convoButtonPanel.setLayout(new GridLayout(1, 9));
+        convoButtonPanel.setLayout(new GridLayout(2, 7));
         convoInputPanel.add(convoButtonPanel);
         convoButtonPanel.add(createActionButton("Help", () -> chat.handleCommand("help")));
+        convoButtonPanel.add(createActionButton("List Messages", () -> chat.handleCommand("m-list")));
         convoButtonPanel.add(createActionButton("Add Message", () -> chat.handleCommand("m-add " + convoTextInput.getText())));
+        convoButtonPanel.add(createActionButton("List Members", () -> chat.handleCommand("u-member-list")));
         convoButtonPanel.add(createActionButton("Add Member", () -> chat.handleCommand("u-add-member " + convoTextInput.getText())));
         convoButtonPanel.add(createActionButton("Remove Member", () -> chat.handleCommand("u-remove-member " + convoTextInput.getText())));
+        convoButtonPanel.add(createActionButton("List Owners", () -> chat.handleCommand("u-owner-list")));
         convoButtonPanel.add(createActionButton("Remove Owner", () -> chat.handleCommand("u-remove-owner " + convoTextInput.getText())));
         convoButtonPanel.add(createActionButton("Add Owner", () -> chat.handleCommand("u-add-owner " + convoTextInput.getText())));
+        convoButtonPanel.add(createActionButton("My Status", () -> chat.handleCommand("my-access-status")));
         convoButtonPanel.add(createActionButton("Info", () -> chat.handleCommand("info")));
         JButton convoBack = new JButton("Back");
         convoBack.addActionListener(new ActionListener() {
@@ -236,7 +252,9 @@ public class GUI {
 
         });
         convoButtonPanel.add(convoBack);
-        convoButtonPanel.add(createActionButton("Exit", () -> chat.handleCommand("exit")));
+        JButton convoExit = new JButton("Exit");
+        convoExit.addActionListener(exitListener);
+        convoButtonPanel.add(convoExit);
 
         window.pack();
         window.setVisible(true);
@@ -256,7 +274,7 @@ public class GUI {
 }
 
 /**
- * Created by Jiahui Chen on 8/2/2017.
+ * Created by Jiahui Chen on 8/2/2017
  * Creates a custom output stream that will display to the GUI's text panel.
  */
 class GUIOutputDisplay extends OutputStream {
