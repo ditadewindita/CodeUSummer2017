@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.function.Supplier;
 
 /**
  * Created by Jiahui Chen on 7/30/2017.
@@ -69,50 +70,12 @@ public class GUI {
         JPanel rootButtonPanel = new JPanel();
         rootButtonPanel.setLayout(new GridLayout(1, 6));
         rootInputPanel.add(rootButtonPanel);
-        JButton rootHelp = new JButton("Help");
-        rootHelp.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                chat.handleCommand("help");
-            }
 
-        });
-        rootButtonPanel.add(rootHelp);
-        JButton listUsers = new JButton("List Users");
-        listUsers.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chat.handleCommand("u-list");
-            }
-        });
-        rootButtonPanel.add(listUsers);
-        JButton addUser = new JButton("Add User");
-        addUser.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chat.handleCommand("u-add " + rootTextInput.getText());
-            }
-        });
-        rootButtonPanel.add(addUser);
-        JButton info = new JButton("Info");
-        info.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chat.handleCommand("info");
-            }
-        });
-        rootButtonPanel.add(info);
-        JButton exit = new JButton("Exit");
-        ActionListener exitListener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                chat.handleCommand("exit");
-                window.dispose();
-                System.exit(0);
-            }
-        };
-        exit.addActionListener(exitListener);
-        rootButtonPanel.add(exit);
+        rootButtonPanel.add(createActionButton("Help", () -> chat.handleCommand("help")));
+        rootButtonPanel.add(createActionButton("List Users", () -> chat.handleCommand("u-list")));
+        rootButtonPanel.add(createActionButton("Add User", () -> chat.handleCommand("u-add " + rootTextInput.getText())));
+        rootButtonPanel.add(createActionButton("Info", () -> chat.handleCommand("info")));
+        rootButtonPanel.add(createActionButton("Exit", () -> chat.handleCommand("exit")));
 
 
         //User panel holding user panel's GUI, same as root panel but different buttons
@@ -168,87 +131,16 @@ public class GUI {
         JPanel userButtonPanel = new JPanel();
         userButtonPanel.setLayout(new GridLayout(2, 7));
         userInputPanel.add(userButtonPanel);
-        JButton userHelp = new JButton("Help");
-        userHelp.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                chat.handleCommand("help");
-            }
-
-        });
-        userButtonPanel.add(userHelp);
-        JButton listConvos = new JButton("List Chats");
-        listConvos.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chat.handleCommand("c-list");
-            }
-        });
-        userButtonPanel.add(listConvos);
-        JButton listInterestConvos = new JButton("List Interest Chats");
-        listInterestConvos.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chat.handleCommand("c-interest-list");
-            }
-        });
-        userButtonPanel.add(listInterestConvos);
-        JButton addInterestConvo = new JButton("Add Interest Chat");
-        addInterestConvo.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chat.handleCommand("c-interest-add " + userTextInput.getText());
-            }
-        });
-        userButtonPanel.add(addInterestConvo);
-        JButton removeInterestConvo = new JButton("Remove Interest Chat");
-        removeInterestConvo.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chat.handleCommand("c-interest-remove " + userTextInput.getText());
-            }
-        });
-        userButtonPanel.add(removeInterestConvo);
-        JButton listInterestUsers = new JButton("List Interest Users");
-        listInterestUsers.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chat.handleCommand("u-interest-list");
-            }
-        });
-        userButtonPanel.add(listInterestUsers);
-        JButton addInterestUser = new JButton("Add Interest User");
-        addInterestUser.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chat.handleCommand("u-interest-add " + userTextInput.getText());
-            }
-        });
-        userButtonPanel.add(addInterestUser);
-        JButton removeInterestUser = new JButton("Remove Interest User");
-        removeInterestUser.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chat.handleCommand("u-interest-remove " + userTextInput.getText());
-            }
-        });
-        userButtonPanel.add(removeInterestUser);
-        JButton statusUpdate = new JButton("Status Update");
-        userButtonPanel.add(statusUpdate);
-        statusUpdate.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chat.handleCommand("status-update");
-            }
-        });
-        JButton userInfo = new JButton("Info");
-        userInfo.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chat.handleCommand("info");
-            }
-        });
-        userButtonPanel.add(userInfo);
+        userButtonPanel.add(createActionButton("Help", () -> chat.handleCommand("help")));
+        userButtonPanel.add(createActionButton("List Chats", () -> chat.handleCommand("c-list")));
+        userButtonPanel.add(createActionButton("List Interest Chats", () -> chat.handleCommand("c-interest-list")));
+        userButtonPanel.add(createActionButton("Add Interest Chat", () -> chat.handleCommand("c-interest-add " + userTextInput.getText())));
+        userButtonPanel.add(createActionButton("Remove Interest Chat", () -> chat.handleCommand("c-interest-remove " + userTextInput.getText())));
+        userButtonPanel.add(createActionButton("List Interest Users", () -> chat.handleCommand("u-interest-list")));
+        userButtonPanel.add(createActionButton("Add Interest User", () -> chat.handleCommand("u-interest-add " + userTextInput.getText())));
+        userButtonPanel.add(createActionButton("Remove Interest User", () ->  chat.handleCommand("u-interest-remove " + userTextInput.getText())));
+        userButtonPanel.add(createActionButton("Status Update", () -> chat.handleCommand("status-update")));
+        userButtonPanel.add(createActionButton("Info", () -> chat.handleCommand("info")));
         JButton userBack = new JButton("Back");
         userBack.addActionListener(new ActionListener() {
             @Override
@@ -260,10 +152,7 @@ public class GUI {
             }
 
         });
-        userButtonPanel.add(userBack);
-        JButton userExit = new JButton("Exit");
-        userExit.addActionListener(exitListener);
-        userButtonPanel.add(userExit);
+        userButtonPanel.add(createActionButton("Exit", () -> chat.handleCommand("exit")));
 
 
         //Conversation panel holding conversation panel's GUI, same as root panel but different buttons
@@ -328,62 +217,13 @@ public class GUI {
         JPanel convoButtonPanel = new JPanel();
         convoButtonPanel.setLayout(new GridLayout(1, 9));
         convoInputPanel.add(convoButtonPanel);
-        JButton convoHelp = new JButton("Help");
-        convoHelp.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chat.handleCommand("help");
-            }
-        });
-        convoButtonPanel.add(convoHelp);
-        JButton addMessage = new JButton("Add Message");
-        addMessage.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chat.handleCommand("m-add " + convoTextInput.getText());
-            }
-        });
-        convoButtonPanel.add(addMessage);
-        JButton addMember = new JButton("Add Member");
-        addMember.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chat.handleCommand("u-add-member " + convoTextInput.getText());
-            }
-        });
-        convoButtonPanel.add(addMember);
-        JButton removeMember = new JButton("Remove Member");
-        removeMember.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chat.handleCommand("u-remove-member " + convoTextInput.getText());
-            }
-        });
-        convoButtonPanel.add(removeMember);
-        JButton removeOwner = new JButton("Remove Owner");
-        removeOwner.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chat.handleCommand("u-remove-owner " + convoTextInput.getText());
-            }
-        });
-        convoButtonPanel.add(removeOwner);
-        JButton addOwner = new JButton("Add Owner");
-        addOwner.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chat.handleCommand("u-add-owner " + convoTextInput.getText());
-            }
-        });
-        convoButtonPanel.add(addOwner);
-        JButton convoInfo = new JButton("Info");
-        convoInfo.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                chat.handleCommand("info");
-            }
-        });
-        convoButtonPanel.add(convoInfo);
+        convoButtonPanel.add(createActionButton("Help", () -> chat.handleCommand("help")));
+        convoButtonPanel.add(createActionButton("Add Message", () -> chat.handleCommand("m-add " + convoTextInput.getText())));
+        convoButtonPanel.add(createActionButton("Add Member", () -> chat.handleCommand("u-add-member " + convoTextInput.getText())));
+        convoButtonPanel.add(createActionButton("Remove Member", () -> chat.handleCommand("u-remove-member " + convoTextInput.getText())));
+        convoButtonPanel.add(createActionButton("Remove Owner", () -> chat.handleCommand("u-remove-owner " + convoTextInput.getText())));
+        convoButtonPanel.add(createActionButton("Add Owner", () -> chat.handleCommand("u-add-owner " + convoTextInput.getText())));
+        convoButtonPanel.add(createActionButton("Info", () -> chat.handleCommand("info")));
         JButton convoBack = new JButton("Back");
         convoBack.addActionListener(new ActionListener() {
             @Override
@@ -396,13 +236,22 @@ public class GUI {
 
         });
         convoButtonPanel.add(convoBack);
-        JButton convoExit = new JButton("Exit");
-        convoExit.addActionListener(exitListener);
-        convoButtonPanel.add(convoExit);
+        convoButtonPanel.add(createActionButton("Exit", () -> chat.handleCommand("exit")));
 
         window.pack();
         window.setVisible(true);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+
+    private static JButton createActionButton(String label, Supplier<Boolean> handleCommand) {
+        JButton button = new JButton(label);
+        button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                handleCommand.get();
+            }
+        });
+        return button;
     }
 }
 
