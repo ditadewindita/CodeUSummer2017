@@ -51,6 +51,8 @@ final class ClientMain {
 
     chat = new Chat(new Context(source));
 
+    GUI.launchGUI(chat);
+
     LOG.info("Created client");
 
     boolean keepRunning = true;
